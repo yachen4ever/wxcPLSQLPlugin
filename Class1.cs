@@ -65,10 +65,10 @@ namespace wxcPLSQLPlugin
             }
         }
 
-        [DllExport("OnActive", CallingConvention = CallingConvention.Cdecl)]
-        public static void OnActive()
+        [DllExport("OnActivate", CallingConvention = CallingConvention.Cdecl)]
+        public static void OnActivate()
         {
-            ideSplashWriteLnCallback("Loading Oryacle Plugin Written by WangXuChen");
+            ideSplashWriteLnCallback("\n\nLoading Oryacle Plugin Written by WangXuChen");
         }
 
         [DllExport("OnMenuClick", CallingConvention = CallingConvention.Cdecl)]
