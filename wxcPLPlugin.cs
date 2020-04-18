@@ -31,7 +31,9 @@ namespace wxcPLSQLPlugin
         private static wxcPLSQLPlugin thisPlugin;
         private int thispluginId;
 
-        private const int PLUGIN_MENU_INDEX = 3;
+        //菜单项定义
+        private const int MENU_INDEX_HELLOWORLD = 3;
+        private const int MENU_INDEX_WHEREIN = 4;
 
         //回调方法定义                             命名规范:驼峰函数名+Callback
         //同时，每个回调方法都有PL/SQL约定好的index。  命名规范:CONST_CB_函数名
@@ -102,10 +104,13 @@ namespace wxcPLSQLPlugin
                         return "TAB=wxcPQPlugin";
 
                     case 2:
-                        return "GROUP=Crt window";
+                        return "GROUP=wxcPQPlugin1";
 
-                    case PLUGIN_MENU_INDEX:
+                    case MENU_INDEX_HELLOWORLD:
                         return "ITEM=Hello World";
+
+                    case MENU_INDEX_WHEREIN:
+                        return "ITEM=WHERE IN (X)";
 
                     default:
                         return "";
@@ -120,10 +125,13 @@ namespace wxcPLSQLPlugin
                         return "wxcPQPlugin / -";
 
                     //case 2:
-                    //    return "wxcPQPlugin / Crt Window";
+                    //    return "wxcPQPlugin / wxcPQPlugin1";
 
-                    case PLUGIN_MENU_INDEX:
+                    case MENU_INDEX_HELLOWORLD:
                         return "wxcPQPlugin / Hello World";
+
+                    case MENU_INDEX_WHEREIN:
+                        return "wxcPQPlugin / WHERE IN (X)";
 
                     default:
                         return "";
@@ -135,9 +143,14 @@ namespace wxcPLSQLPlugin
         [DllExport("OnMenuClick", CallingConvention = CallingConvention.Cdecl)]
         public static void OnMenuClick(int index)
         {
-            if (index == PLUGIN_MENU_INDEX)
+            switch (index)
             {
-                thisPlugin.CreateSqlWindow();
+                case MENU_INDEX_HELLOWORLD:
+                    thisPlugin.CreateSqlWindow("select 'Hello world!' from dual");
+                    break;
+                case MENU_INDEX_WHEREIN:
+                    thisPlugin.HandleWhereInX();
+                    break;
             }
         }
 
@@ -180,7 +193,7 @@ namespace wxcPLSQLPlugin
         {
             ideSplashCreateCallback(100);
             ideSplashWriteLnCallback("");
-            ideSplashWriteCallback("Loading wxcPQPlugin： ");
+            ideSplashWriteCallback("Loading wxcPQPlugin v0.1： ");
             ideSplashWriteCallback("PL/SQL版本： " + sysVersionCallback().ToString());
         }
 
@@ -188,17 +201,27 @@ namespace wxcPLSQLPlugin
         [DllExport("About", CallingConvention = CallingConvention.Cdecl)]
         public static string About()
         {
-            return "This Oryacle (A PL/SQL Developer Plugin) is Written by WangXuChen(YaCHEN) Providing Some Useful Function to PL/SQL Developer.";
+            return "WXCPLPlugin 0.1 is a Plugin Aiming to Provide Some Useful Function to PL/SQL Developer.";
         }
 
         //DllExport区域结束标识
         #endregion
 
-        public void CreateSqlWindow()
+        public void CreateSqlWindow(string s)
         {
             ideCreateWindowCallback(1, "", false);
-            ideSetTextCallback("select 'Hello world!' from dual");
+            ideSetTextCallback(s);
         }
 
+        public void HandleWhereInX()
+        {
+            string strToBeHandled = ideGetSelectedTextCallback();
+            if (string.IsNullOrWhiteSpace(strToBeHandled))
+            {
+                strToBeHandled = ideGetTextCallback();
+            }
+            CreateSqlWindow(strToBeHandled);
+          
+        }
     }
 }
