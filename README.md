@@ -1,6 +1,6 @@
 ﻿# WXCPLSQLPlugin
 
-这是一个为PL/SQL开发的插件，用于替代年久失修的CnPlugin
+这是一个为PL/SQL Developer开发的插件，用于替代年久失修的CnPlugin
 
 ## Todo List
 1. 点击按钮自动将一串字符a{sep}b{sep}c拼接成where x in ('a','b','c'),{sep}可为{',',' ','CRLF'}
