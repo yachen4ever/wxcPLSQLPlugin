@@ -293,7 +293,7 @@ namespace wxcPLSQLPlugin
         }
 
         //Escape一句话
-        public string EscapeSentence(string strToBeHandled)
+        public static string EscapeSentence(string strToBeHandled)
         {
             //处理文本
             string strAfterHandle = strToBeHandled.Trim();
@@ -303,12 +303,80 @@ namespace wxcPLSQLPlugin
             {
                 strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
             }
+            //转义引号
             strAfterHandle = strAfterHandle.Replace("'", "''");
-            strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
 
+            //末尾为变量标识
+            bool flagVariableAtEnd = false;
+
+            //寻找&
+            int intPosOfAmpersand;
+            while (true)
+            {
+                intPosOfAmpersand = strAfterHandle.IndexOf("&");
+                //如果没找到或者&在末尾直接结束
+                if (intPosOfAmpersand < 0 || intPosOfAmpersand == strAfterHandle.Length - 1)
+                {
+                    break;
+                }
+                //变量名从&后一位开始
+                int intPosOfVariableStart = intPosOfAmpersand + 1;
+                //初始变量长度为1
+                int intVariableLength = 1;
+                while (true)
+                {
+                    //如果搜到结尾了就跳出
+                    if (intPosOfVariableStart + intVariableLength == strAfterHandle.Length)
+                    {
+                        break;
+                    }
+                    //如果这一位还是合法变量名，长度+1
+                    if (char.IsLetterOrDigit(strAfterHandle[intPosOfVariableStart + intVariableLength]))
+                    {
+                        intVariableLength++;
+                    }
+                    //不合法了跳出
+                    else
+                    {
+                        break;
+                    }
+
+                }
+                //拉出变量名
+                string strVariableName = strAfterHandle.Substring(intPosOfVariableStart, intVariableLength);
+                string strAmpersandVariable = "&" + strVariableName;
+                string strConnectedVariableInBetween = "'||" + strVariableName + "||'";
+                string strConnectedVariableAtEnd = "'||" + strVariableName;
+                if (intPosOfVariableStart + intVariableLength == strAfterHandle.Length)
+                {
+                    strAfterHandle = strAfterHandle.Replace(strAmpersandVariable, strConnectedVariableAtEnd);
+                    flagVariableAtEnd = true;
+                }
+                else
+                {
+                    strAfterHandle = strAfterHandle.Replace(strAmpersandVariable, strConnectedVariableInBetween);
+                }
+            }
+            if (flagVariableAtEnd)
+            {
+                strAfterHandle = "Execute Immediate '" + strAfterHandle + ";";
+            }
+            else
+            {
+                strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
+            }
             return strAfterHandle;
         }
-        
+
+        private bool isLegalChar(char v)
+        {
+            if (char.IsLetterOrDigit(v) || v == '_')
+            {
+                return true;
+            }
+            return false;
+        }
+
         //UnEscape一句话
         public string UnEscapeSentence(string strToBeHandled)
         {
