@@ -292,6 +292,59 @@ namespace wxcPLSQLPlugin
 
         }
 
+        //Escape一句话
+        public string EscapeSentence(string strToBeHandled)
+        {
+            //处理文本
+            string strAfterHandle = strToBeHandled.Trim();
+
+            //剔除最后的换行或;
+            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+            strAfterHandle = strAfterHandle.Replace("'", "''");
+            strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
+
+            return strAfterHandle;
+        }
+        
+        //UnEscape一句话
+        public string UnEscapeSentence(string strToBeHandled)
+        {
+            //处理文本
+            string strAfterHandle = strToBeHandled.Trim();
+
+            //剔除最后的换行或;
+            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+
+            strAfterHandle = strAfterHandle.Replace("''", "'");
+            //踢掉execute和immediate
+            strAfterHandle = Regex.Replace(strAfterHandle, "execute", "", RegexOptions.IgnoreCase);
+            strAfterHandle = Regex.Replace(strAfterHandle, "immediate", "", RegexOptions.IgnoreCase);
+            strAfterHandle = strAfterHandle.Trim();
+            //剔除开头的引号
+            if (strAfterHandle.StartsWith("'"))
+            {
+                strAfterHandle = strAfterHandle.Remove(0, 1);
+            }
+            //剔除结尾的引号
+            if (strAfterHandle.EndsWith("'"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+            //如果本来语句结尾没分号就补一个
+            if (!strAfterHandle.EndsWith(";"))
+            {
+                strAfterHandle += ";";
+            }
+
+            return strAfterHandle;
+        }
+
         //处理Escape功能的方法
         public void HandleEscape()
         {
@@ -310,8 +363,7 @@ namespace wxcPLSQLPlugin
             {
                 flagIsSelected = false;
             }
-            //定义处理后的文本
-            string strAfterHandle = "";
+
 
             //如果没有选中文本则处理全部文本
             if (!flagIsSelected)
@@ -320,14 +372,7 @@ namespace wxcPLSQLPlugin
             }
 
             //处理文本
-            strAfterHandle = strToBeHandled.Trim();
-            //剔除最后的换行或;
-            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
-            {
-                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
-            }
-            strAfterHandle = strAfterHandle.Replace("'", "''");
-            strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
+            string strAfterHandle = EscapeSentence(strToBeHandled);
 
             //如果没有选中文本直接输出全部文本
             if (!flagIsSelected)
@@ -368,35 +413,7 @@ namespace wxcPLSQLPlugin
             }
 
             //处理文本
-            //定义处理后的文本
-            string strAfterHandle = strToBeHandled.Trim();
-            
-            //剔除最后的换行或;
-            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
-            {
-                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
-            }
-                        
-            strAfterHandle = strAfterHandle.Replace("''", "'");
-            //踢掉execute和immediate
-            strAfterHandle = Regex.Replace(strAfterHandle, "execute", "", RegexOptions.IgnoreCase);
-            strAfterHandle = Regex.Replace(strAfterHandle, "immediate", "", RegexOptions.IgnoreCase);
-            strAfterHandle = strAfterHandle.Trim();
-            //剔除开头的引号
-            if (strAfterHandle.StartsWith("'"))
-            {
-                strAfterHandle = strAfterHandle.Remove(0, 1);
-            }
-            //剔除结尾的引号
-            if (strAfterHandle.EndsWith("'"))
-            {
-                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
-            }
-            //如果本来语句结尾没分号就补一个
-            if (!strAfterHandle.EndsWith(";"))
-            {
-                strAfterHandle += ";";
-            }
+            string strAfterHandle = UnEscapeSentence(strToBeHandled);
 
             //如果没有选中文本直接输出全部文本
             if (!flagIsSelected)
