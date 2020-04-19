@@ -13,6 +13,8 @@ namespace wxcPLSQLPlugin
     delegate string IdeGetText();
     //序号31，获得窗口中选中的值
     delegate string IdeGetSelectedText();
+    //序号33，获得窗口中选中的值的位置
+    delegate int IdeGetEditorHandle();
     //序号34，设置窗口中的值
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdeSetText(string text);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
@@ -21,8 +23,6 @@ namespace wxcPLSQLPlugin
     delegate void IdeSplashWrite(string s);
     //序号93，改变登录界面文字+换行
     delegate void IdeSplashWriteLn(string s);
-  
-
 
     public class wxcPLSQLPlugin
     {
@@ -48,6 +48,9 @@ namespace wxcPLSQLPlugin
 
         private static IdeGetSelectedText ideGetSelectedTextCallback;
         private const int CONST_CB_IDE_GETSELECTEDTEXT = 31;
+
+        private static IdeGetEditorHandle ideGetEditorHandleCallback;
+        private const int CONST_CB_IDE_GETEDITORHANDLE = 33;
 
         private static IdeSetText ideSetTextCallback;
         private const int CONST_CB_IDE_SETTEXT = 34;
@@ -171,6 +174,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case CONST_CB_IDE_GETSELECTEDTEXT:
                     ideGetSelectedTextCallback = (IdeGetSelectedText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetSelectedText));
+                    break;              
+                case CONST_CB_IDE_GETEDITORHANDLE:
+                    ideGetEditorHandleCallback = (IdeGetEditorHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetEditorHandle));
                     break;
                 case CONST_CB_IDE_SETTEXT:
                     ideSetTextCallback = (IdeSetText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSetText));
@@ -213,15 +219,77 @@ namespace wxcPLSQLPlugin
             ideSetTextCallback(s);
         }
 
+        //处理WhereInX功能的方法
         public void HandleWhereInX()
         {
+            //先拉文本
             string strToBeHandled = ideGetSelectedTextCallback();
+            string strAll = ideGetTextCallback();
+            //如果根本就没有文本直接退出
+            if (string.IsNullOrWhiteSpace(strAll))
+            {
+                return;
+            }
+            //标识是否为选中的文本
+            bool flagIsSelected = true;
+            //如果没有选中文本，则为否
             if (string.IsNullOrWhiteSpace(strToBeHandled))
             {
-                strToBeHandled = ideGetTextCallback();
+                flagIsSelected = false;
             }
-            CreateSqlWindow(strToBeHandled);
-          
+            //定义处理后的文本
+            string strAfterHandle = "(";
+            int intSelectedPos = 0;
+            //标识一下需不需要逗号
+            bool flagNeedComma = false;
+           
+            //如果没有选中文本则处理全部文本
+            if (!flagIsSelected)
+            {
+                strToBeHandled = strAll;
+                intSelectedPos = 0;
+            }
+            else
+            {
+                intSelectedPos = strAll.IndexOf(strToBeHandled);
+            }
+
+            //CreateSqlWindow(intSelectedPos.ToString());
+
+            //处理文本
+            //定义一下分隔符
+            char[] delimiterChars = {' ', ',', '，', '\t','\r','\n'};
+            string[] words = strToBeHandled.Split(delimiterChars);
+     
+            foreach (var word in words)
+            {
+                //只要不是空的就格式化下塞进strAfterHandled
+                if (!string.IsNullOrWhiteSpace(word))
+                {
+                    if (!flagNeedComma) 
+                    {
+                        strAfterHandle = strAfterHandle + "'" + word + "'";
+                        flagNeedComma = true;
+                    }
+                    else
+                    {
+                        strAfterHandle = strAfterHandle + ",'" + word + "'";
+                    }
+                }
+            }
+            strAfterHandle += ")";
+
+            //如果没有选中文本直接输出全部文本
+            if (!flagIsSelected)
+            {
+                ideSetTextCallback(strAfterHandle);
+            }
+            //否则在strAll里替换一下输出回去
+            else
+            {
+                ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
+            }
+
         }
     }
-}
+}  
