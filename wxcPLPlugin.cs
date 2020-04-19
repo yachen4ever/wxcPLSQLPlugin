@@ -347,16 +347,19 @@ namespace wxcPLSQLPlugin
                 string strAmpersandVariable = "&" + strVariableName;
                 string strConnectedVariableInBetween = "'||" + strVariableName + "||'";
                 string strConnectedVariableAtEnd = "'||" + strVariableName;
+                //如果变量在末尾用尾部不带||的去拼
                 if (intPosOfVariableStart + intVariableLength == strAfterHandle.Length)
                 {
                     strAfterHandle = strAfterHandle.Replace(strAmpersandVariable, strConnectedVariableAtEnd);
                     flagVariableAtEnd = true;
                 }
+                //反之用尾部带||的去拼
                 else
                 {
                     strAfterHandle = strAfterHandle.Replace(strAmpersandVariable, strConnectedVariableInBetween);
                 }
             }
+            //如果末尾有变量就不需要结尾的单引号了
             if (flagVariableAtEnd)
             {
                 strAfterHandle = "Execute Immediate '" + strAfterHandle + ";";
