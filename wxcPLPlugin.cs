@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace wxcPLSQLPlugin
 {
@@ -13,8 +14,6 @@ namespace wxcPLSQLPlugin
     delegate string IdeGetText();
     //序号31，获得窗口中选中的值
     delegate string IdeGetSelectedText();
-    //序号33，获得窗口中选中的值的位置
-    delegate int IdeGetEditorHandle();
     //序号34，设置窗口中的值
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdeSetText(string text);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
@@ -34,6 +33,8 @@ namespace wxcPLSQLPlugin
         //菜单项定义
         private const int MENU_INDEX_HELLOWORLD = 3;
         private const int MENU_INDEX_WHEREIN = 4;
+        private const int MENU_INDEX_ESCAPE = 5;
+        private const int MENU_INDEX_UNESCAPE = 6;
 
         //回调方法定义                             命名规范:驼峰函数名+Callback
         //同时，每个回调方法都有PL/SQL约定好的index。  命名规范:CONST_CB_函数名
@@ -48,9 +49,6 @@ namespace wxcPLSQLPlugin
 
         private static IdeGetSelectedText ideGetSelectedTextCallback;
         private const int CONST_CB_IDE_GETSELECTEDTEXT = 31;
-
-        private static IdeGetEditorHandle ideGetEditorHandleCallback;
-        private const int CONST_CB_IDE_GETEDITORHANDLE = 33;
 
         private static IdeSetText ideSetTextCallback;
         private const int CONST_CB_IDE_SETTEXT = 34;
@@ -115,6 +113,12 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_WHEREIN:
                         return "ITEM=WHERE IN (X)";
 
+                    case MENU_INDEX_ESCAPE:
+                        return "ITEM=将语句写入Execute Immediate";
+
+                    case MENU_INDEX_UNESCAPE:
+                        return "ITEM=将语句从Execute Immediate提出";
+
                     default:
                         return "";
                 }
@@ -136,6 +140,12 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_WHEREIN:
                         return "wxcPQPlugin / WHERE IN (X)";
 
+                    case MENU_INDEX_ESCAPE:
+                        return "wxcPQPlugin / 将语句写入Execute Immediate";
+
+                    case MENU_INDEX_UNESCAPE:
+                        return "wxcPQPlugin / 将语句从Execute Immediate提出";
+
                     default:
                         return "";
                 }
@@ -153,6 +163,12 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_WHEREIN:
                     thisPlugin.HandleWhereInX();
+                    break;
+                case MENU_INDEX_ESCAPE:
+                    thisPlugin.HandleEscape();
+                    break;
+                case MENU_INDEX_UNESCAPE:
+                    thisPlugin.HandleUnEscape();
                     break;
             }
         }
@@ -175,9 +191,6 @@ namespace wxcPLSQLPlugin
                 case CONST_CB_IDE_GETSELECTEDTEXT:
                     ideGetSelectedTextCallback = (IdeGetSelectedText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetSelectedText));
                     break;              
-                case CONST_CB_IDE_GETEDITORHANDLE:
-                    ideGetEditorHandleCallback = (IdeGetEditorHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetEditorHandle));
-                    break;
                 case CONST_CB_IDE_SETTEXT:
                     ideSetTextCallback = (IdeSetText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSetText));
                     break;
@@ -232,29 +245,16 @@ namespace wxcPLSQLPlugin
             }
             //标识是否为选中的文本
             bool flagIsSelected = true;
-            //如果没有选中文本，则为否
+            //如果没有选中文本，则处理全部文本，同时表示flagSelected为否
             if (string.IsNullOrWhiteSpace(strToBeHandled))
             {
                 flagIsSelected = false;
+                strToBeHandled = strAll;
             }
             //定义处理后的文本
             string strAfterHandle = "(";
-            int intSelectedPos = 0;
             //标识一下需不需要逗号
             bool flagNeedComma = false;
-           
-            //如果没有选中文本则处理全部文本
-            if (!flagIsSelected)
-            {
-                strToBeHandled = strAll;
-                intSelectedPos = 0;
-            }
-            else
-            {
-                intSelectedPos = strAll.IndexOf(strToBeHandled);
-            }
-
-            //CreateSqlWindow(intSelectedPos.ToString());
 
             //处理文本
             //定义一下分隔符
@@ -278,6 +278,125 @@ namespace wxcPLSQLPlugin
                 }
             }
             strAfterHandle += ")";
+
+            //如果没有选中文本直接输出全部文本
+            if (!flagIsSelected)
+            {
+                ideSetTextCallback(strAfterHandle);
+            }
+            //否则在strAll里替换一下输出回去
+            else
+            {
+                ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
+            }
+
+        }
+
+        //处理Escape功能的方法
+        public void HandleEscape()
+        {
+            //先拉文本
+            string strToBeHandled = ideGetSelectedTextCallback();
+            string strAll = ideGetTextCallback();
+            //如果根本就没有文本直接退出
+            if (string.IsNullOrWhiteSpace(strAll))
+            {
+                return;
+            }
+            //标识是否为选中的文本
+            bool flagIsSelected = true;
+            //如果没有选中文本，则为否
+            if (string.IsNullOrWhiteSpace(strToBeHandled))
+            {
+                flagIsSelected = false;
+            }
+            //定义处理后的文本
+            string strAfterHandle = "";
+
+            //如果没有选中文本则处理全部文本
+            if (!flagIsSelected)
+            {
+                strToBeHandled = strAll;
+            }
+
+            //处理文本
+            strAfterHandle = strToBeHandled.Trim();
+            //剔除最后的换行或;
+            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+            strAfterHandle = strAfterHandle.Replace("'", "''");
+            strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
+
+            //如果没有选中文本直接输出全部文本
+            if (!flagIsSelected)
+            {
+                ideSetTextCallback(strAfterHandle);
+            }
+            //否则在strAll里替换一下输出回去
+            else
+            {
+                ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
+            }
+
+        }
+
+        //处理UnEscape功能的方法
+        public void HandleUnEscape()
+        {
+            //先拉文本
+            string strToBeHandled = ideGetSelectedTextCallback();
+            string strAll = ideGetTextCallback();
+            //如果根本就没有文本直接退出
+            if (string.IsNullOrWhiteSpace(strAll))
+            {
+                return;
+            }
+            //标识是否为选中的文本
+            bool flagIsSelected = true;
+            //如果没有选中文本，则为否
+            if (string.IsNullOrWhiteSpace(strToBeHandled))
+            {
+                flagIsSelected = false;
+            }
+
+            //如果没有选中文本则处理全部文本
+            if (!flagIsSelected)
+            {
+                strToBeHandled = strAll;
+            }
+
+            //处理文本
+            //定义处理后的文本
+            string strAfterHandle = strToBeHandled.Trim();
+            
+            //剔除最后的换行或;
+            while (strAfterHandle.EndsWith(";") || strAfterHandle.EndsWith("\r") || strAfterHandle.EndsWith("\n"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+                        
+            strAfterHandle = strAfterHandle.Replace("''", "'");
+            //踢掉execute和immediate
+            strAfterHandle = Regex.Replace(strAfterHandle, "execute", "", RegexOptions.IgnoreCase);
+            strAfterHandle = Regex.Replace(strAfterHandle, "immediate", "", RegexOptions.IgnoreCase);
+            strAfterHandle = strAfterHandle.Trim();
+            //剔除开头的引号
+            if (strAfterHandle.StartsWith("'"))
+            {
+                strAfterHandle = strAfterHandle.Remove(0, 1);
+            }
+            //剔除结尾的引号
+            if (strAfterHandle.EndsWith("'"))
+            {
+                strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+            //如果本来语句结尾没分号就补一个
+            if (!strAfterHandle.EndsWith(";"))
+            {
+                strAfterHandle += ";";
+            }
 
             //如果没有选中文本直接输出全部文本
             if (!flagIsSelected)
