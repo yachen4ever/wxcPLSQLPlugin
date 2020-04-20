@@ -292,7 +292,7 @@ namespace wxcPLSQLPlugin
 
         }
 
-        //Escape一句话
+        //Escape一句SQL
         public static string EscapeSentence(string strToBeHandled)
         {
             //处理文本
@@ -331,7 +331,7 @@ namespace wxcPLSQLPlugin
                         break;
                     }
                     //如果这一位还是合法变量名，长度+1
-                    if (char.IsLetterOrDigit(strAfterHandle[intPosOfVariableStart + intVariableLength]))
+                    if (isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intVariableLength]))
                     {
                         intVariableLength++;
                     }
@@ -371,7 +371,8 @@ namespace wxcPLSQLPlugin
             return strAfterHandle;
         }
 
-        private bool isLegalChar(char v)
+        //判断是否为合法变量字符
+        private static bool isLegalVariableChar(char v)
         {
             if (char.IsLetterOrDigit(v) || v == '_')
             {
@@ -380,8 +381,8 @@ namespace wxcPLSQLPlugin
             return false;
         }
 
-        //UnEscape一句话
-        public string UnEscapeSentence(string strToBeHandled)
+        //UnEscape一句SQL
+        public static string UnEscapeSentence(string strToBeHandled)
         {
             //处理文本
             string strAfterHandle = strToBeHandled.Trim();
@@ -406,6 +407,60 @@ namespace wxcPLSQLPlugin
             if (strAfterHandle.EndsWith("'"))
             {
                 strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 1);
+            }
+
+            int intPosOfJoint;
+
+            //bug：如果拼接的不是变量而是用到了Oracle函数怎么办，里面可能还会有单引号，括号
+            //把用||拼接的变量替换成&变量名
+            while (true)
+            {
+                //找到第一个||
+                intPosOfJoint = strAfterHandle.IndexOf("||");
+                if (intPosOfJoint <= 0)
+                {
+                    break;
+                }
+                //往前找前一串字符串的结尾引号
+                int intPosOfPrevEndQuote = intPosOfJoint - 1;
+                while (strAfterHandle[intPosOfPrevEndQuote] != '\'')
+                {
+                    intPosOfPrevEndQuote--;
+                }
+                //往后找变量名
+                int intPosOfVariableStart = intPosOfJoint + 2;
+                while (!isLegalVariableChar(strAfterHandle[intPosOfVariableStart]))
+                {
+                    if (intPosOfVariableStart == strAfterHandle.Length - 1)
+                    {
+                        break;
+                    }
+                    intPosOfVariableStart++;
+                }
+                int intPosOfVariableLength = 1;
+                while (isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intPosOfVariableLength]))
+                {
+                    if (intPosOfVariableStart + intPosOfVariableLength == strAfterHandle.Length - 1)
+                    {
+                        break;
+                    }
+                    intPosOfVariableLength++;
+                }
+                //获得变量名
+                string strVariableName = strAfterHandle.Substring(intPosOfVariableStart, intPosOfVariableLength);
+                //再往后找下一个||，找不到说明在结尾
+                int intPosOfNextStartQuote = intPosOfVariableStart + intPosOfVariableLength;
+                while (strAfterHandle[intPosOfNextStartQuote] != '\'')
+                {
+                    if (intPosOfNextStartQuote == strAfterHandle.Length - 1)
+                    {
+                        break;
+                    }
+                    intPosOfNextStartQuote++;
+                }
+                //替换下
+                string strShouldBeReplaced = strAfterHandle.Substring(intPosOfPrevEndQuote, intPosOfNextStartQuote - intPosOfPrevEndQuote + 1);
+                strAfterHandle = strAfterHandle.Replace(strShouldBeReplaced, "&" + strVariableName);
             }
             //如果本来语句结尾没分号就补一个
             if (!strAfterHandle.EndsWith(";"))
