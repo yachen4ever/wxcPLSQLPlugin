@@ -43,6 +43,10 @@ namespace wxcPLSQLPlugin
         }
         public static string pluginRoot;
         public static string pluginSettingFile;
+        public string GetPluginSettingFile()
+        {
+            return pluginSettingFile;
+        }
         private static wxcPLSQLPlugin thisPlugin;
         private int thispluginId;
 
@@ -55,6 +59,7 @@ namespace wxcPLSQLPlugin
         private const int MENU_INDEX_UNESCAPE = 6;
         private const int MENU_INDEX_COMMENT = 7;
         private const int MENU_INDEX_GROUP_ABOUT = 90;
+        private const int MENU_INDEX_SETTINGSFORM = 98;
         private const int MENU_INDEX_ABOUTFORM = 99;
 
         //回调方法定义                             命名规范:驼峰函数名+Callback
@@ -149,6 +154,9 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_GROUP_ABOUT:
                         return "GROUP=关于";
 
+                    case MENU_INDEX_SETTINGSFORM:
+                        return "ITEM=插件设置";
+
                     case MENU_INDEX_ABOUTFORM:
                         return "ITEM=关于此插件";
 
@@ -184,7 +192,10 @@ namespace wxcPLSQLPlugin
 
                     case MENU_INDEX_GROUP_ABOUT:
                         return "wxcPQPlugin / -";
-
+                    
+                    case MENU_INDEX_SETTINGSFORM:
+                        return "wxcPQPlugin / 插件设置";
+                    
                     case MENU_INDEX_ABOUTFORM:
                         return "wxcPQPlugin / 关于此插件";
 
@@ -214,6 +225,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_COMMENT:
                     thisPlugin.HandleComment();
+                    break;
+                case MENU_INDEX_SETTINGSFORM:
+                    thisPlugin.ShowSettingsForm();
                     break;
                 case MENU_INDEX_ABOUTFORM:
                     thisPlugin.ShowAboutForm();
@@ -277,9 +291,9 @@ namespace wxcPLSQLPlugin
             else
             {
                 ideSplashWriteCallback("配置文件不存在，生成默认设置...");
-                //File.WriteAllText(pluginSettingFile, Properties.Resources.DefaultConfig);
-                //thisPlugin.settingsParser = new FileIniDataParser();
-                //thisPlugin.settings = thisPlugin.settingsParser.ReadFile(pluginSettingFile);
+                File.WriteAllText(pluginSettingFile, Properties.Resources.DefaultConfig);
+                var settingsParser = new FileIniDataParser();
+                settings = settingsParser.ReadFile(pluginSettingFile);
             }
             ideSplashWriteCallback("完成");
 
@@ -306,9 +320,10 @@ namespace wxcPLSQLPlugin
         public static void AfterStart()
         {
             int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
-            ideCreateWindowCallback(intWindowType, "", false);
-            //ideSetTextCallback(intWindowType.ToString());
-            //ideCreateWindowCallback(1, "", false);
+            if (intWindowType>0)
+            { 
+                ideCreateWindowCallback(intWindowType, "", false);
+            }
         }
 
         //DllExport区域结束标识
@@ -730,6 +745,12 @@ namespace wxcPLSQLPlugin
             {
                 ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
             }
+        }
+
+        private void ShowSettingsForm()
+        {
+            SettingsUI frm = new SettingsUI();
+            frm.Show(thisPlugin);
         }
 
         private void ShowAboutForm()
