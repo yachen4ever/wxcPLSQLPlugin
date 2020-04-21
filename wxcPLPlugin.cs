@@ -42,6 +42,7 @@ namespace wxcPLSQLPlugin
         private const int MENU_INDEX_WHEREIN = 4;
         private const int MENU_INDEX_ESCAPE = 5;
         private const int MENU_INDEX_UNESCAPE = 6;
+        private const int MENU_INDEX_COMMENT = 7;
         private const int MENU_INDEX_GROUP_ABOUT = 90;
         private const int MENU_INDEX_ABOUTFORM = 99;
 
@@ -128,6 +129,9 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_UNESCAPE:
                         return "ITEM=将语句从Execute Immediate提出";
 
+                    case MENU_INDEX_COMMENT:
+                        return "ITEM=注释或去注释语句";
+
                     case MENU_INDEX_GROUP_ABOUT:
                         return "GROUP=关于";
 
@@ -161,6 +165,9 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_UNESCAPE:
                         return "wxcPQPlugin / 将语句从Execute Immediate提出";
 
+                    case MENU_INDEX_COMMENT:
+                        return "wxcPQPlugin / 注释或去注释语句";
+
                     case MENU_INDEX_GROUP_ABOUT:
                         return "wxcPQPlugin / -";
 
@@ -190,6 +197,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_UNESCAPE:
                     thisPlugin.HandleUnEscape();
+                    break;
+                case MENU_INDEX_COMMENT:
+                    thisPlugin.HandleComment();
                     break;
                 case MENU_INDEX_ABOUTFORM:
                     thisPlugin.ShowAboutForm();
@@ -584,6 +594,96 @@ namespace wxcPLSQLPlugin
                 ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
             }
 
+        }
+
+        //处理注释功能的方法
+        private void HandleComment()
+        {
+            //先拉文本
+            string strToBeHandled = ideGetSelectedTextCallback();
+            string strAll = ideGetTextCallback();
+            //如果根本就没有文本直接退出
+            if (string.IsNullOrWhiteSpace(strAll))
+            {
+                return;
+            }
+            //标识是否为选中的文本
+            bool flagIsSelected = true;
+            //如果没有选中文本，则为否
+            if (string.IsNullOrWhiteSpace(strToBeHandled))
+            {
+                flagIsSelected = false;
+            }
+
+            //如果没有选中文本则处理全部文本
+            if (!flagIsSelected)
+            {
+                strToBeHandled = strAll;
+            }
+
+            string strAfterHandle = "";
+            //按行切割
+            string[] lines = strToBeHandled.Split(new string[] {"\r\n"}, StringSplitOptions.None);
+            //默认功能为加注释
+            bool flagAllHaveComment = true;
+
+            //如果选中每行都有注释，功能就变成去注释
+            foreach (var line in lines)
+            {
+                if (line.Length <= 0)
+                {
+                    continue;
+                }
+                if (line.IndexOf("--") < 0)
+                {
+                    flagAllHaveComment = false;
+                }
+            }
+
+            //去注释的情况
+            if (flagAllHaveComment)
+            {
+                foreach (var line in lines)
+                {
+                    if (line.Length <= 2)
+                    {
+                        strAfterHandle += line + "\r\n";
+                        continue;
+                    }
+                    //删掉--
+                    var strLineAfterHandle = line.Replace("--","");
+                    strAfterHandle += strLineAfterHandle + "\r\n";
+                }
+            }
+            //加注释的情况
+            else
+            {
+                foreach (var line in lines)
+                {
+                    if (line.Length <= 0)
+                    {
+                        strAfterHandle += line + "\r\n";
+                        continue;
+                    }
+                    var strLineAfterHandle = "--" + line;
+                    strAfterHandle += strLineAfterHandle + "\r\n";
+                }
+
+            }
+
+            //删除最后多的换行符
+            strAfterHandle = strAfterHandle.Remove(strAfterHandle.Length - 2, 2);
+
+            //如果没有选中文本直接输出全部文本
+            if (!flagIsSelected)
+            {
+                ideSetTextCallback(strAfterHandle);
+            }
+            //否则在strAll里替换一下输出回去
+            else
+            {
+                ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
+            }
         }
 
         private void ShowAboutForm()

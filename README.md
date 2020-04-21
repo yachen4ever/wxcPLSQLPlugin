@@ -6,12 +6,13 @@
 1. 点击按钮自动将一串字符a{sep}b{sep}c拼接成where x in ('a','b','c'),{sep}可为{',',' ',TAB,CR,LF,CRLF}
 2. 自动将语句替换增加/去除转义的功能。（针对Execute Immediate时需要将语句放入字符串/从Execute Immediate提取出的情况）
 3. 打开PL/SQL自动启动一个SQL查询窗口
-4. 关于窗口设计
+4. 关于窗口
+5. 添加/去除注释（针对行、代码块、行中的一部分）
 
 ## Todo List
 1. 比自带的自动替换更好用的Auto Replace功能，可自定义替换按键
 2. 自动Commit （软件自带有，提供个设置）
-3. 添加/去除注释（针对行、代码块、行中的一部分）
+3. 插件设置界面
 
 ## Better Experience
 1. wherexin功能直接从剪切板拉取数据
@@ -30,3 +31,4 @@
 ## Thanks
 1. (CnPlugin)[http://blog.sina.com.cn/marcconverter]
 2. (DllExport)[https://github.com/3F/DllExport]
+3. (Newtonsoft.Json)[https://github.com/JamesNK/Newtonsoft.Json]
