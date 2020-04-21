@@ -223,6 +223,14 @@ namespace wxcPLSQLPlugin
             return "WXCPLPlugin 0.1 is a Plugin Aiming to Provide Some Useful Function to PL/SQL Developer.";
         }
 
+        //AfterStart事件方法。触发于PL/SQL加载完所有自身内容和插件后。
+         //创建一个空白窗口
+        [DllExport("AfterStart", CallingConvention = CallingConvention.Cdecl)]
+        public static void AfterStart()
+        {
+            ideCreateWindowCallback(1, "", false);
+        }
+
         //DllExport区域结束标识
         #endregion
 
