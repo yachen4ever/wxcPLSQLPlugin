@@ -34,5 +34,10 @@ namespace wxcPLSQLPlugin
         {
             label2.Text += this.plugin.GetPluginVersion();
         }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
