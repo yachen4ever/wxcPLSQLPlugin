@@ -6,6 +6,7 @@
 1. 点击按钮自动将一串字符a{sep}b{sep}c拼接成where x in ('a','b','c'),{sep}可为{',',' ',TAB,CR,LF,CRLF}
 2. 自动将语句替换增加/去除转义的功能。（针对Execute Immediate时需要将语句放入字符串/从Execute Immediate提取出的情况）
 3. 打开PL/SQL自动启动一个SQL查询窗口
+4. 关于窗口设计
 
 ## Todo List
 1. 比自带的自动替换更好用的Auto Replace功能，可自定义替换按键

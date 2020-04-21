@@ -31,10 +31,14 @@ namespace wxcPLSQLPlugin
         private int thispluginId;
 
         //菜单项定义
+        private const int MENU_INDEX_START = 1;
+        private const int MENU_INDEX_GROUP_FUNCTION = 2;
         private const int MENU_INDEX_HELLOWORLD = 3;
         private const int MENU_INDEX_WHEREIN = 4;
         private const int MENU_INDEX_ESCAPE = 5;
         private const int MENU_INDEX_UNESCAPE = 6;
+        private const int MENU_INDEX_GROUP_ABOUT = 90;
+        private const int MENU_INDEX_ABOUTFORM = 99;
 
         //回调方法定义                             命名规范:驼峰函数名+Callback
         //同时，每个回调方法都有PL/SQL约定好的index。  命名规范:CONST_CB_函数名
@@ -101,11 +105,11 @@ namespace wxcPLSQLPlugin
             {
                 switch (index)
                 {
-                    case 1:
+                    case MENU_INDEX_START:
                         return "TAB=wxcPQPlugin";
 
-                    case 2:
-                        return "GROUP=wxcPQPlugin1";
+                    case MENU_INDEX_GROUP_FUNCTION:
+                        return "GROUP=功能";
 
                     case MENU_INDEX_HELLOWORLD:
                         return "ITEM=Hello World";
@@ -119,6 +123,12 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_UNESCAPE:
                         return "ITEM=将语句从Execute Immediate提出";
 
+                    case MENU_INDEX_GROUP_ABOUT:
+                        return "GROUP=关于";
+
+                    case MENU_INDEX_ABOUTFORM:
+                        return "ITEM=关于此插件";
+
                     default:
                         return "";
                 }
@@ -128,11 +138,11 @@ namespace wxcPLSQLPlugin
             {
                 switch (index)
                 {
-                    case 1:
+                    case MENU_INDEX_START:
                         return "wxcPQPlugin / -";
 
-                    //case 2:
-                    //    return "wxcPQPlugin / wxcPQPlugin1";
+                    case MENU_INDEX_GROUP_FUNCTION:
+                        return "wxcPQPlugin / -";
 
                     case MENU_INDEX_HELLOWORLD:
                         return "wxcPQPlugin / Hello World";
@@ -145,6 +155,12 @@ namespace wxcPLSQLPlugin
 
                     case MENU_INDEX_UNESCAPE:
                         return "wxcPQPlugin / 将语句从Execute Immediate提出";
+
+                    case MENU_INDEX_GROUP_ABOUT:
+                        return "wxcPQPlugin / -";
+
+                    case MENU_INDEX_ABOUTFORM:
+                        return "wxcPQPlugin / 关于此插件";
 
                     default:
                         return "";
@@ -169,6 +185,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_UNESCAPE:
                     thisPlugin.HandleUnEscape();
+                    break;
+                case MENU_INDEX_ABOUTFORM:
+                    thisPlugin.ShowAboutForm();
                     break;
             }
         }
@@ -560,6 +579,12 @@ namespace wxcPLSQLPlugin
                 ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
             }
 
+        }
+
+        private void ShowAboutForm()
+        {
+            AboutForm frm = new AboutForm();
+            frm.Show(thisPlugin);
         }
     }
 }  
