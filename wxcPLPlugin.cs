@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace wxcPLSQLPlugin
 {
-    //声明引入回调方法
+        //声明引入回调方法
 
     //序号1，获得PL/SQL Developer版本信息
     delegate int SysVersion();
@@ -27,6 +27,11 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
+        public static string pluginVersion = "0.1Alpha";
+        public string GetPluginVersion()
+        {
+            return pluginVersion;
+        }
         private static wxcPLSQLPlugin thisPlugin;
         private int thispluginId;
 
@@ -239,7 +244,7 @@ namespace wxcPLSQLPlugin
         [DllExport("About", CallingConvention = CallingConvention.Cdecl)]
         public static string About()
         {
-            return "WXCPLPlugin 0.1 is a Plugin Aiming to Provide Some Useful Function to PL/SQL Developer.";
+            return " 这是一个为PL/SQL Developer开发的插件，\r\n 用于提供一些PL/SQL缺失的实用功能。\r\n\r\n 开发者信息：\r\n 蚌埠电信分公司 智慧营销中心/IT支撑中心 王旭晨\r\n 联系方式: 18955296958\r\n QQ: 360039166\r\n 项目信息：https://github.com/yachen4ever/wxcPLSQLPlugin \r\n 当前版本：" + pluginVersion;
         }
 
         //AfterStart事件方法。触发于PL/SQL加载完所有自身内容和插件后。

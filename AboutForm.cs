@@ -29,5 +29,10 @@ namespace wxcPLSQLPlugin
         {
             this.Close();
         }
+
+        private void AboutForm_Load(object sender, EventArgs e)
+        {
+            label2.Text += this.plugin.GetPluginVersion();
+        }
     }
 }

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutForm));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
@@ -56,7 +57,7 @@
             this.label2.TabIndex = 1;
             this.label2.Text = "这是一个为PL/SQL Developer开发的插件，\r\n用于提供一些PL/SQL缺失的实用功能。\r\n\r\n开发者信息：\r\n蚌埠电信分公司 智慧营销中心/IT支撑中" +
     "心 王旭晨\r\n联系方式: 18955296958\r\nQQ 360039166\r\n\r\n项目信息：\r\nhttps://github.com/yachen4ever/" +
-    "wxcPLSQLPlugin\r\n当前版本：0.1Alpha\r\n";
+    "wxcPLSQLPlugin\r\n当前版本：";
             this.label2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // button1
@@ -89,8 +90,10 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AboutForm";
             this.Text = "关于";
+            this.Load += new System.EventHandler(this.AboutForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
