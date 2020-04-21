@@ -1,13 +1,18 @@
-﻿using System;
+﻿using IniParser;
+using IniParser.Model;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace wxcPLSQLPlugin
 {
-        //声明引入回调方法
+    //声明引入回调方法
 
     //序号1，获得PL/SQL Developer版本信息
     delegate int SysVersion();
+    //序号3，获得PL/SQL Developer根路径
+    delegate string SysRootDir();
     //序号20，创建窗口
     delegate void IdeCreateWindow(int windowType, string text, [MarshalAs(UnmanagedType.Bool)] bool execute);
     //序号30，获得窗口中的值
@@ -28,10 +33,16 @@ namespace wxcPLSQLPlugin
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
         public static string pluginVersion = "0.1Alpha";
+
+        //INIParser
+        public static IniData settings;
+
         public string GetPluginVersion()
         {
             return pluginVersion;
         }
+        public static string pluginRoot;
+        public static string pluginSettingFile;
         private static wxcPLSQLPlugin thisPlugin;
         private int thispluginId;
 
@@ -50,6 +61,9 @@ namespace wxcPLSQLPlugin
         //同时，每个回调方法都有PL/SQL约定好的index。  命名规范:CONST_CB_函数名
         private static SysVersion sysVersionCallback;
         private const int CONST_CB_SYS_VERSION = 1;
+
+        private static SysRootDir sysRootDirCallback;
+        private const int CONST_CB_SYS_ROOTDIR = 3;
 
         private static IdeCreateWindow ideCreateWindowCallback;
         private const int CONST_CB_IDE_CREATEWINDOW = 20;
@@ -216,6 +230,9 @@ namespace wxcPLSQLPlugin
                 case CONST_CB_SYS_VERSION:
                     sysVersionCallback = (SysVersion)Marshal.GetDelegateForFunctionPointer(function, typeof(SysVersion));
                     break;
+                case CONST_CB_SYS_ROOTDIR:
+                    sysRootDirCallback = (SysRootDir)Marshal.GetDelegateForFunctionPointer(function, typeof(SysRootDir));
+                    break;
                 case CONST_CB_IDE_CREATEWINDOW:
                     ideCreateWindowCallback = (IdeCreateWindow)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeCreateWindow));
                     break;
@@ -246,8 +263,26 @@ namespace wxcPLSQLPlugin
         {
             ideSplashCreateCallback(100);
             ideSplashWriteLnCallback("");
-            ideSplashWriteCallback("Loading wxcPQPlugin v0.1： ");
-            ideSplashWriteCallback("PL/SQL版本： " + sysVersionCallback().ToString());
+            ideSplashWriteCallback("加载wxcPQPlugin插件中： ");
+            ideSplashWriteLnCallback("PL/SQL版本： " + sysVersionCallback().ToString());
+            pluginRoot = sysRootDirCallback() + @"\Plugins\";
+            pluginSettingFile = pluginRoot + "wxcPQPlugin.ini";
+            
+            if (System.IO.File.Exists(pluginSettingFile))
+            {
+                ideSplashWriteCallback("找到配置文件，读取中...");
+                var iniDataParser = new FileIniDataParser();
+                settings = iniDataParser.ReadFile(pluginSettingFile);
+            }
+            else
+            {
+                ideSplashWriteCallback("配置文件不存在，生成默认设置...");
+                //File.WriteAllText(pluginSettingFile, Properties.Resources.DefaultConfig);
+                //thisPlugin.settingsParser = new FileIniDataParser();
+                //thisPlugin.settings = thisPlugin.settingsParser.ReadFile(pluginSettingFile);
+            }
+            ideSplashWriteCallback("完成");
+
         }
 
         //About事件方法。设置PL/SQL插件设置窗口里关于的返回值。
@@ -257,12 +292,23 @@ namespace wxcPLSQLPlugin
             return " 这是一个为PL/SQL Developer开发的插件，\r\n 用于提供一些PL/SQL缺失的实用功能。\r\n\r\n 开发者信息：\r\n 蚌埠电信分公司 智慧营销中心/IT支撑中心 王旭晨\r\n 联系方式: 18955296958\r\n QQ: 360039166\r\n 项目信息：https://github.com/yachen4ever/wxcPLSQLPlugin \r\n 当前版本：" + pluginVersion;
         }
 
+        //Configure事件方法。设置PL/SQL插件设置窗口里设置按钮的事件。
+        [DllExport("Configure", CallingConvention = CallingConvention.Cdecl)]
+        public static void Configure()
+        {
+            SettingsUI frm = new SettingsUI();
+            frm.Show(thisPlugin);
+        }
+
         //AfterStart事件方法。触发于PL/SQL加载完所有自身内容和插件后。
-         //创建一个空白窗口
+        //创建一个空白窗口
         [DllExport("AfterStart", CallingConvention = CallingConvention.Cdecl)]
         public static void AfterStart()
         {
-            ideCreateWindowCallback(1, "", false);
+            int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
+            ideCreateWindowCallback(intWindowType, "", false);
+            //ideSetTextCallback(intWindowType.ToString());
+            //ideCreateWindowCallback(1, "", false);
         }
 
         //DllExport区域结束标识
@@ -691,5 +737,6 @@ namespace wxcPLSQLPlugin
             AboutForm frm = new AboutForm();
             frm.Show(thisPlugin);
         }
+
     }
 }  

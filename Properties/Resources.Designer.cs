@@ -61,6 +61,16 @@ namespace wxcPLSQLPlugin.Properties {
         }
         
         /// <summary>
+        ///   查找类似 [Startup]
+        ///OpenWindowType=1 的本地化字符串。
+        /// </summary>
+        internal static string DefaultConfig {
+            get {
+                return ResourceManager.GetString("DefaultConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
         internal static System.Drawing.Bitmap icons8_info_50 {
