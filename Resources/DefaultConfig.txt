@@ -1,2 +1,4 @@
 [Startup]
 OpenWindowType=1
+[Function]
+AutoCommit=1

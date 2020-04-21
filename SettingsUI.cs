@@ -39,8 +39,12 @@ namespace wxcPLSQLPlugin
         {
             var parser = new FileIniDataParser();
             IniData settingsToBeSaved = new IniData();
+
+            //启动时打开窗口
             settingsToBeSaved["Startup"]["OpenWindowType"] = comboBoxStartup.SelectedIndex.ToString();
 
+            //自动Commit
+            settingsToBeSaved["Function"]["AutoCommit"] = comboBoxAfterExecute.SelectedIndex.ToString();
             parser.WriteFile(pluginSettingFile, settingsToBeSaved);
         }
 
@@ -50,7 +54,13 @@ namespace wxcPLSQLPlugin
             Text = plugin.Name;
             var parser = new FileIniDataParser();
             IniData settings = parser.ReadFile(pluginSettingFile);
+
+            //启动时打开窗口
             comboBoxStartup.SelectedIndex = int.Parse(settings["Startup"]["OpenWindowType"]);
+
+            //自动Commit
+            comboBoxAfterExecute.SelectedIndex = int.Parse(settings["Function"]["AutoCommit"]);
+            
         }
     }
 }

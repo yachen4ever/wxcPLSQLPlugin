@@ -21,12 +21,17 @@ namespace wxcPLSQLPlugin
     delegate string IdeGetSelectedText();
     //序号34，设置窗口中的值
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdeSetText(string text);
+    //序号39，执行特定操作
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdePerform(int Param);
+    //序号40，执行SQL语句
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlExecute(string SQL);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
     delegate void IdeSplashCreate(int progressMax);
     //序号93，改变登录界面文字
     delegate void IdeSplashWrite(string s);
     //序号93，改变登录界面文字+换行
     delegate void IdeSplashWriteLn(string s);
+
 
     public class wxcPLSQLPlugin
     {
@@ -80,7 +85,13 @@ namespace wxcPLSQLPlugin
         private const int CONST_CB_IDE_GETSELECTEDTEXT = 31;
 
         private static IdeSetText ideSetTextCallback;
-        private const int CONST_CB_IDE_SETTEXT = 34;
+        private const int CONST_CB_IDE_SETTEXT = 34; 
+        
+        private static IdePerform idePerformCallback;
+        private const int CONST_CB_IDE_PERFORM = 39;
+
+        private static SqlExecute sqlExecuteCallback;
+        private const int CONST_CB_SQL_EXECUTE = 40;
 
         private static IdeSplashCreate ideSplashCreateCallback;
         private const int CONST_CB_IDE_SPLASHCREATE = 90;
@@ -259,6 +270,12 @@ namespace wxcPLSQLPlugin
                 case CONST_CB_IDE_SETTEXT:
                     ideSetTextCallback = (IdeSetText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSetText));
                     break;
+                case CONST_CB_IDE_PERFORM:
+                    idePerformCallback = (IdePerform)Marshal.GetDelegateForFunctionPointer(function, typeof(IdePerform));
+                    break; 
+                case CONST_CB_SQL_EXECUTE:
+                    sqlExecuteCallback = (SqlExecute)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlExecute));
+                    break;
                 case CONST_CB_IDE_SPLASHCREATE:
                     ideSplashCreateCallback = (IdeSplashCreate)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSplashCreate));
                     break;
@@ -297,6 +314,21 @@ namespace wxcPLSQLPlugin
             }
             ideSplashWriteCallback("完成");
 
+        }
+
+        [DllExport("AfterExecuteWindow", CallingConvention = CallingConvention.Cdecl)]
+        public static void AfterExecuteWindow()
+        {
+            if (settings["Function"]["AutoCommit"] == "1")
+            {
+                //通过IDE_PERFORM执行commit（会提示）
+                bool a = idePerformCallback(4);
+            }
+            else if (settings["Function"]["AutoCommit"] == "2")
+            {
+                //通过SQL_EXECUTE执行commit（不提示）
+                bool a = sqlExecuteCallback("commit;");
+            }
         }
 
         //About事件方法。设置PL/SQL插件设置窗口里关于的返回值。
