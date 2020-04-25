@@ -27,7 +27,7 @@ namespace wxcPLSQLPlugin
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlExecute(string SQL);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
     delegate void IdeSplashCreate(int progressMax);
-    //序号93，改变登录界面文字
+    //序号92，改变登录界面文字
     delegate void IdeSplashWrite(string s);
     //序号93，改变登录界面文字+换行
     delegate void IdeSplashWriteLn(string s);
@@ -327,7 +327,7 @@ namespace wxcPLSQLPlugin
             else if (settings["Function"]["AutoCommit"] == "2")
             {
                 //通过SQL_EXECUTE执行commit（不提示）
-                bool a = sqlExecuteCallback("commit;");
+                bool a = sqlExecuteCallback("commit");
             }
         }
 
