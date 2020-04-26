@@ -31,7 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.comboBoxAfterExecute = new System.Windows.Forms.ComboBox();
             this.comboBoxStartup = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.fileSystemWatcher1 = new System.IO.FileSystemWatcher();
@@ -39,8 +41,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.comboBoxAfterExecute = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBoxAskOnClosing = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
@@ -61,9 +63,11 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.comboBoxAskOnClosing);
             this.tabPage1.Controls.Add(this.comboBoxAfterExecute);
             this.tabPage1.Controls.Add(this.comboBoxStartup);
             this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Location = new System.Drawing.Point(4, 43);
             this.tabPage1.Name = "tabPage1";
@@ -72,6 +76,18 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = " 启动设置 ";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxAfterExecute
+            // 
+            this.comboBoxAfterExecute.FormattingEnabled = true;
+            this.comboBoxAfterExecute.Items.AddRange(new object[] {
+            "不自动Commit",
+            "提示是否需要Commit",
+            "自动Commit（在PLSQL14还会提示）"});
+            this.comboBoxAfterExecute.Location = new System.Drawing.Point(264, 105);
+            this.comboBoxAfterExecute.Name = "comboBoxAfterExecute";
+            this.comboBoxAfterExecute.Size = new System.Drawing.Size(403, 39);
+            this.comboBoxAfterExecute.TabIndex = 1;
             // 
             // comboBoxStartup
             // 
@@ -89,6 +105,15 @@
             this.comboBoxStartup.Name = "comboBoxStartup";
             this.comboBoxStartup.Size = new System.Drawing.Size(403, 39);
             this.comboBoxStartup.TabIndex = 1;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(72, 108);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(204, 31);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "执行SQL语句后：";
             // 
             // label1
             // 
@@ -152,26 +177,26 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // label2
+            // label3
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(72, 108);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(204, 31);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "执行SQL语句后：";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(72, 170);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(158, 31);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "启动时打开：";
             // 
-            // comboBoxAfterExecute
+            // comboBoxAskOnClosing
             // 
-            this.comboBoxAfterExecute.FormattingEnabled = true;
-            this.comboBoxAfterExecute.Items.AddRange(new object[] {
-            "不自动Commit",
-            "提示是否需要Commit",
-            "自动Commit（在PLSQL14还会提示）"});
-            this.comboBoxAfterExecute.Location = new System.Drawing.Point(264, 105);
-            this.comboBoxAfterExecute.Name = "comboBoxAfterExecute";
-            this.comboBoxAfterExecute.Size = new System.Drawing.Size(403, 39);
-            this.comboBoxAfterExecute.TabIndex = 1;
+            this.comboBoxAskOnClosing.FormattingEnabled = true;
+            this.comboBoxAskOnClosing.Items.AddRange(new object[] {
+            "默认（发生变动则提示）",
+            "永远提示",
+            "永远不提示"});
+            this.comboBoxAskOnClosing.Location = new System.Drawing.Point(264, 167);
+            this.comboBoxAskOnClosing.Name = "comboBoxAskOnClosing";
+            this.comboBoxAskOnClosing.Size = new System.Drawing.Size(403, 39);
+            this.comboBoxAskOnClosing.TabIndex = 1;
             // 
             // SettingsUI
             // 
@@ -208,5 +233,7 @@
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ComboBox comboBoxAfterExecute;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBoxAskOnClosing;
+        private System.Windows.Forms.Label label3;
     }
 }

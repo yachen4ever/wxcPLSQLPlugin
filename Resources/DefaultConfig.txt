@@ -2,3 +2,5 @@
 OpenWindowType=1
 [Function]
 AutoCommit=1
+[Other]
+AskOnClosing=2

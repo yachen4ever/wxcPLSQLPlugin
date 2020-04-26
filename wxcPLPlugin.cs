@@ -63,6 +63,12 @@ namespace wxcPLSQLPlugin
         private const int MENU_INDEX_ESCAPE = 5;
         private const int MENU_INDEX_UNESCAPE = 6;
         private const int MENU_INDEX_COMMENT = 7;
+        private const int MENU_INDEX_GROUP_MOST_USED_SQL = 70;
+        private const int MENU_INDEX_SQL_LOCKEDTABLE = 71;
+        private const int MENU_INDEX_SQL_PROCRUNNING = 72;
+        private const int MENU_INDEX_SQL_STOPJOB = 73;
+        private const int MENU_INDEX_SQL_WHICHJOB = 74;
+        private const int MENU_INDEX_SQL_TABLEINWHICHPROC = 75;
         private const int MENU_INDEX_GROUP_ABOUT = 90;
         private const int MENU_INDEX_SETTINGSFORM = 98;
         private const int MENU_INDEX_ABOUTFORM = 99;
@@ -162,6 +168,24 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_COMMENT:
                         return "ITEM=注释或去注释语句";
 
+                    case MENU_INDEX_GROUP_MOST_USED_SQL:
+                        return "GROUP=常用查询";
+
+                    case MENU_INDEX_SQL_LOCKEDTABLE:
+                        return "ITEM=锁表情况";
+
+                    case MENU_INDEX_SQL_PROCRUNNING:
+                        return "ITEM=正在运行的存储过程";
+
+                    case MENU_INDEX_SQL_STOPJOB:
+                        return "ITEM=终止JOB运行";
+
+                    case MENU_INDEX_SQL_WHICHJOB:
+                        return "ITEM=存储过程写在哪个JOB";
+
+                    case MENU_INDEX_SQL_TABLEINWHICHPROC:
+                        return "ITEM=表在哪个存储过程创建";
+
                     case MENU_INDEX_GROUP_ABOUT:
                         return "GROUP=关于";
 
@@ -201,6 +225,24 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_COMMENT:
                         return "wxcPQPlugin / 注释或去注释语句";
 
+                    case MENU_INDEX_GROUP_MOST_USED_SQL:
+                        return "wxcPQPlugin / 常用查询 / -";
+
+                    case MENU_INDEX_SQL_LOCKEDTABLE:
+                        return "wxcPQPlugin / 常用查询 / 锁表情况";
+
+                    case MENU_INDEX_SQL_PROCRUNNING:
+                        return "wxcPQPlugin / 常用查询 / 正在运行的存储过程";
+
+                    case MENU_INDEX_SQL_STOPJOB:
+                        return "wxcPQPlugin / 常用查询 / 终止JOB运行";
+
+                    case MENU_INDEX_SQL_WHICHJOB:
+                        return "wxcPQPlugin / 常用查询 / 存储过程写在哪个JOB";
+
+                    case MENU_INDEX_SQL_TABLEINWHICHPROC:
+                        return "wxcPQPlugin / 常用查询 / 表在哪个存储过程创建";
+
                     case MENU_INDEX_GROUP_ABOUT:
                         return "wxcPQPlugin / -";
                     
@@ -236,6 +278,21 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_COMMENT:
                     thisPlugin.HandleComment();
+                    break;
+                case MENU_INDEX_SQL_LOCKEDTABLE:
+                    thisPlugin.MostUsedSql_LockedTable();
+                    break;
+                case MENU_INDEX_SQL_PROCRUNNING:
+                    thisPlugin.MostUsedSql_ProcRunning();
+                    break;
+                case MENU_INDEX_SQL_STOPJOB:
+                    thisPlugin.MostUsedSql_StopJob();
+                    break;
+                case MENU_INDEX_SQL_WHICHJOB:
+                    thisPlugin.MostUsedSql_WhichJob();
+                    break;
+                case MENU_INDEX_SQL_TABLEINWHICHPROC:
+                    thisPlugin.MostUsedSql_TableInWhichProc();
                     break;
                 case MENU_INDEX_SETTINGSFORM:
                     thisPlugin.ShowSettingsForm();
@@ -317,18 +374,61 @@ namespace wxcPLSQLPlugin
         }
 
         [DllExport("AfterExecuteWindow", CallingConvention = CallingConvention.Cdecl)]
-        public static void AfterExecuteWindow()
+        public static void AfterExecuteWindow(int WindowType, int Result)
         {
-            if (settings["Function"]["AutoCommit"] == "1")
+            if (WindowType == 1 && Result > 0)
             {
-                //通过IDE_PERFORM执行commit（会提示）
-                bool a = idePerformCallback(4);
+                //先拉文本
+                string strExecuted = ideGetSelectedTextCallback();
+                string strAll = ideGetTextCallback();
+                //如果根本就没有文本直接退出
+                if (string.IsNullOrWhiteSpace(strAll))
+                {
+                    return;
+                }
+                //标识是否为选中的文本
+                bool flagIsSelected = true;
+                //如果没有选中文本，则为否
+                if (string.IsNullOrWhiteSpace(strExecuted))
+                {
+                    flagIsSelected = false;
+                }
+
+
+                //如果没有选中文本则处理全部文本
+                if (!flagIsSelected)
+                {
+                    strExecuted = strAll;
+                }
+
+                strExecuted = strExecuted.ToLower();
+
+                //如果有DML语句
+                if (!string.IsNullOrEmpty(settings["Function"]["AutoCommit"]) && (strExecuted.Contains("insert") || strExecuted.Contains("delete") || strExecuted.Contains("update") || strExecuted.Contains("merge")))
+                {
+                    if (settings["Function"]["AutoCommit"] == "1")
+                    {
+
+                        //通过IDE_PERFORM执行commit（会提示）
+                        bool a = idePerformCallback(4);
+                    }
+                    else if (settings["Function"]["AutoCommit"] == "2")
+                    {
+                        //通过SQL_EXECUTE执行commit（不提示）
+                        bool a = sqlExecuteCallback("commit;");
+                    }
+                }
             }
-            else if (settings["Function"]["AutoCommit"] == "2")
-            {
-                //通过SQL_EXECUTE执行commit（不提示）
-                bool a = sqlExecuteCallback("commit;");
+        }
+
+        //关闭窗口事件方法。设置关闭时不要提示保存
+        [DllExport("OnWindowClose", CallingConvention = CallingConvention.Cdecl)]
+        public static int OnWindowClose(int WindowType, [MarshalAs(UnmanagedType.Bool)] bool Changed)
+        {
+            if (!string.IsNullOrEmpty(settings["Other"]["AskOnClosing"])) {
+                return int.Parse(settings["Other"]["AskOnClosing"]);
             }
+            else return 0;
         }
 
         //About事件方法。设置PL/SQL插件设置窗口里关于的返回值。
@@ -351,10 +451,13 @@ namespace wxcPLSQLPlugin
         [DllExport("AfterStart", CallingConvention = CallingConvention.Cdecl)]
         public static void AfterStart()
         {
-            int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
-            if (intWindowType>0)
-            { 
-                ideCreateWindowCallback(intWindowType, "", false);
+            if (string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
+            {
+                int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
+                if (intWindowType > 0)
+                {
+                    ideCreateWindowCallback(intWindowType, "", false);
+                }
             }
         }
 
@@ -791,5 +894,38 @@ namespace wxcPLSQLPlugin
             frm.Show(thisPlugin);
         }
 
+        private void MostUsedSql_LockedTable()
+        {
+            CreateSqlWindow("select a.object_name,s.sid,s.serial# from v$locked_object lo,dba_objects a, v$session s where a.object_id=lo.object_id and lo.session_id=s.sid;\r\n\r\n--alter system kill session '&sid,&serial';");
+            idePerformCallback(1);
+        }
+
+        private void MostUsedSql_StopJob()
+        {
+            CreateSqlWindow("--1.查询出正在执行的Job\r\nselect * from dba_jobs_running;\r\n\r\n--2.将Job标记为Broken\r\nbegin\r\n    DBMS_JOB.BROKEN(&JOB, true);\r\nend;\r\n\r\n--3.根据sid查询出session信息\r\nselect SID,SERIAL# from V$Session where SID=&sid;\r\n\r\n--4.Kill Session\r\nalter system kill session '&sid,&serial';");
+        }
+
+        private void MostUsedSql_WhichJob()
+        {
+            CreateSqlWindow("select job,last_date,last_sec,next_sec,total_time,interval,what from user_jobs\r\nwhere what like '%&PROCNAME%' or what like upper('%&PROCNAME%')");
+            idePerformCallback(1);
+        }
+
+        private void MostUsedSql_ProcRunning()
+        {
+            CreateSqlWindow("select * from v$db_object_cache where type like 'PROCE%' and locks >0 and pins >0;");
+            idePerformCallback(1);
+        } 
+        private void MostUsedSql_TableInWhichProc()
+        {
+            CreateSqlWindow("SELECT DISTINCT * FROM user_source WHERE TYPE = 'PROCEDURE' AND upper(text) LIKE '%CREATE TABLE%&TABLENAME%';");
+            idePerformCallback(1);
+        }
+
+        public void RefreshSetting()
+        {
+            var iniDataParser = new FileIniDataParser();
+            settings = iniDataParser.ReadFile(pluginSettingFile);
+        }
     }
 }  

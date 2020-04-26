@@ -45,7 +45,12 @@ namespace wxcPLSQLPlugin
 
             //自动Commit
             settingsToBeSaved["Function"]["AutoCommit"] = comboBoxAfterExecute.SelectedIndex.ToString();
+
+            //关闭时提示修改是否保存
+            settingsToBeSaved["Other"]["AskOnClosing"] = comboBoxAskOnClosing.SelectedIndex.ToString();
             parser.WriteFile(pluginSettingFile, settingsToBeSaved);
+
+            plugin.RefreshSetting();
         }
 
         //加载事件
@@ -56,11 +61,35 @@ namespace wxcPLSQLPlugin
             IniData settings = parser.ReadFile(pluginSettingFile);
 
             //启动时打开窗口
-            comboBoxStartup.SelectedIndex = int.Parse(settings["Startup"]["OpenWindowType"]);
+            if (string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
+            {
+                comboBoxStartup.SelectedIndex = 0;
+            }
+            else
+            {
+                comboBoxStartup.SelectedIndex = int.Parse(settings["Startup"]["OpenWindowType"]);
+            }
 
             //自动Commit
-            comboBoxAfterExecute.SelectedIndex = int.Parse(settings["Function"]["AutoCommit"]);
+            if (string.IsNullOrEmpty(settings["Function"]["AutoCommit"]))
+            {
+                comboBoxAfterExecute.SelectedIndex = 0;
+            }
+            else
+            {
+                comboBoxAfterExecute.SelectedIndex = int.Parse(settings["Function"]["AutoCommit"]);
+            }
+            //关闭时提示修改是否保存
+            if (string.IsNullOrEmpty(settings["Other"]["AskOnClosing"]))
+            {
+                comboBoxAskOnClosing.SelectedIndex = 0;
+            }
+            else
+            {
+                comboBoxAskOnClosing.SelectedIndex = int.Parse(settings["Other"]["AskOnClosing"]);
+            }
             
+
         }
     }
 }
