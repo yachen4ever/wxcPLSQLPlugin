@@ -13,6 +13,8 @@ namespace wxcPLSQLPlugin
     delegate int SysVersion();
     //序号3，获得PL/SQL Developer根路径
     delegate string SysRootDir();
+    //序号16，获得当前PL/SQL窗口的句柄
+    delegate IntPtr IdeGetWindowHandle();
     //序号18，获得当前激活子窗口的句柄
     delegate IntPtr IdeGetChildHandle();
     //序号20，创建窗口
@@ -82,6 +84,9 @@ namespace wxcPLSQLPlugin
 
         private static SysRootDir sysRootDirCallback;
         private const int CONST_CB_SYS_ROOTDIR = 3;
+
+        private static IdeGetWindowHandle ideGetWindowHandleCallback;
+        private const int CONST_CB_IDE_GETWINDOWHANDLE = 16;
 
         private static IdeGetChildHandle ideGetChildHandleCallback;
         private const int CONST_CB_IDE_GETCHILDHANDLE = 18;
@@ -319,7 +324,10 @@ namespace wxcPLSQLPlugin
                     break;
                 case CONST_CB_SYS_ROOTDIR:
                     sysRootDirCallback = (SysRootDir)Marshal.GetDelegateForFunctionPointer(function, typeof(SysRootDir));
-                    break;                
+                    break;
+                case CONST_CB_IDE_GETWINDOWHANDLE:
+                    ideGetWindowHandleCallback = (IdeGetWindowHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetWindowHandle));
+                    break;
                 case CONST_CB_IDE_GETCHILDHANDLE:
                     ideGetChildHandleCallback = (IdeGetChildHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetChildHandle));
                     break;
@@ -384,10 +392,19 @@ namespace wxcPLSQLPlugin
         [DllExport("OnWindowCreated", CallingConvention = CallingConvention.Cdecl)]
         public static void OnWindowCreated(int WindowType)
         {
-            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]) && settings["Startup"]["MaximizeWindow"] =="1")
+            //最大化子窗口
+            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeChildWindow"]) && settings["Startup"]["MaximizeChildWindow"] =="1")
             {
                 //获取当前子窗口句柄
                 IntPtr windowHandle = ideGetChildHandleCallback();
+                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
+            }
+
+            //最大化PL/SQL窗口
+            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]) && settings["Startup"]["MaximizeWindow"] == "1")
+            {
+                //获取当前子窗口句柄
+                IntPtr windowHandle = ideGetWindowHandleCallback();
                 ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
         }

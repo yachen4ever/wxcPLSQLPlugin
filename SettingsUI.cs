@@ -49,8 +49,11 @@ namespace wxcPLSQLPlugin
             //关闭时提示修改是否保存
             settingsToBeSaved["Other"]["AskOnClosing"] = comboBoxAskOnClosing.SelectedIndex.ToString();
 
-            //关闭时提示修改是否保存
+            //默认最大化PL/SQL窗口
             settingsToBeSaved["Startup"]["MaximizeWindow"] = checkBoxMaximizeWindow.Checked ? "1" : "0";
+
+            //默认最大化PL/SQL窗口
+            settingsToBeSaved["Startup"]["MaximizeChildWindow"] = checkBoxMaximizeChildWindow.Checked ? "1" : "0";
 
             //写入配置文件
             parser.WriteFile(pluginSettingFile, settingsToBeSaved);
@@ -94,7 +97,7 @@ namespace wxcPLSQLPlugin
                 comboBoxAskOnClosing.SelectedIndex = int.Parse(settings["Other"]["AskOnClosing"]);
             }
 
-            //最大化子窗口
+            //最大化PL/SQL窗口
             if (string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]))
             {
                 checkBoxMaximizeWindow.Checked = false;
@@ -104,6 +107,15 @@ namespace wxcPLSQLPlugin
                 checkBoxMaximizeWindow.Checked = (int.Parse(settings["Startup"]["MaximizeWindow"]) == 1) ? true : false;
             }
 
+            //最大化子窗口
+            if (string.IsNullOrEmpty(settings["Startup"]["MaximizeChildWindow"]))
+            {
+                checkBoxMaximizeWindow.Checked = false;
+            }
+            else
+            {
+                checkBoxMaximizeWindow.Checked = (int.Parse(settings["Startup"]["MaximizeChildWindow"]) == 1) ? true : false;
+            }
 
         }
     }

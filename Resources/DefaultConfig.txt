@@ -1,6 +1,10 @@
 [Startup]
 OpenWindowType=1
+MaximizeWindow=1
+MaximizeChildWindow=1
+
 [Function]
 AutoCommit=1
+
 [Other]
 AskOnClosing=2
