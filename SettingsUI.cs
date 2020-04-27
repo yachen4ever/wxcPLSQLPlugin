@@ -50,7 +50,7 @@ namespace wxcPLSQLPlugin
             settingsToBeSaved["Other"]["AskOnClosing"] = comboBoxAskOnClosing.SelectedIndex.ToString();
 
             //关闭时提示修改是否保存
-            settingsToBeSaved["Startup"]["MaxiumWindow"] = checkBoxMaximizeWindow.Checked ? "1" : "0";
+            settingsToBeSaved["Startup"]["MaximizeWindow"] = checkBoxMaximizeWindow.Checked ? "1" : "0";
 
             //写入配置文件
             parser.WriteFile(pluginSettingFile, settingsToBeSaved);

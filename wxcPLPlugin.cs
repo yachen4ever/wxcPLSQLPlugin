@@ -13,6 +13,8 @@ namespace wxcPLSQLPlugin
     delegate int SysVersion();
     //序号3，获得PL/SQL Developer根路径
     delegate string SysRootDir();
+    //序号18，获得当前激活子窗口的句柄
+    delegate IntPtr IdeGetChildHandle();
     //序号20，创建窗口
     delegate void IdeCreateWindow(int windowType, string text, [MarshalAs(UnmanagedType.Bool)] bool execute);
     //序号30，获得窗口中的值
@@ -80,6 +82,9 @@ namespace wxcPLSQLPlugin
 
         private static SysRootDir sysRootDirCallback;
         private const int CONST_CB_SYS_ROOTDIR = 3;
+
+        private static IdeGetChildHandle ideGetChildHandleCallback;
+        private const int CONST_CB_IDE_GETCHILDHANDLE = 18;
 
         private static IdeCreateWindow ideCreateWindowCallback;
         private const int CONST_CB_IDE_CREATEWINDOW = 20;
@@ -314,6 +319,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case CONST_CB_SYS_ROOTDIR:
                     sysRootDirCallback = (SysRootDir)Marshal.GetDelegateForFunctionPointer(function, typeof(SysRootDir));
+                    break;                
+                case CONST_CB_IDE_GETCHILDHANDLE:
+                    ideGetChildHandleCallback = (IdeGetChildHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetChildHandle));
                     break;
                 case CONST_CB_IDE_CREATEWINDOW:
                     ideCreateWindowCallback = (IdeCreateWindow)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeCreateWindow));
@@ -371,6 +379,17 @@ namespace wxcPLSQLPlugin
             }
             ideSplashWriteCallback("完成");
 
+        }
+
+        [DllExport("OnWindowCreated", CallingConvention = CallingConvention.Cdecl)]
+        public static void OnWindowCreated(int WindowType)
+        {
+            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]) && settings["Startup"]["MaximizeWindow"] =="1")
+            {
+                //获取当前子窗口句柄
+                IntPtr windowHandle = ideGetChildHandleCallback();
+                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
+            }
         }
 
         [DllExport("AfterExecuteWindow", CallingConvention = CallingConvention.Cdecl)]
@@ -882,50 +901,65 @@ namespace wxcPLSQLPlugin
             }
         }
 
+        //显示设置界面
         private void ShowSettingsForm()
         {
             SettingsUI frm = new SettingsUI();
             frm.Show(thisPlugin);
         }
 
+        //显示关于界面
         private void ShowAboutForm()
         {
             AboutForm frm = new AboutForm();
             frm.Show(thisPlugin);
         }
 
+        //常用查询：锁表情况
         private void MostUsedSql_LockedTable()
         {
             CreateSqlWindow("select a.object_name,s.sid,s.serial# from v$locked_object lo,dba_objects a, v$session s where a.object_id=lo.object_id and lo.session_id=s.sid;\r\n\r\n--alter system kill session '&sid,&serial';");
             idePerformCallback(1);
         }
 
+        //常用查询：正在运行的存储过程
         private void MostUsedSql_StopJob()
         {
             CreateSqlWindow("--1.查询出正在执行的Job\r\nselect * from dba_jobs_running;\r\n\r\n--2.将Job标记为Broken\r\nbegin\r\n    DBMS_JOB.BROKEN(&JOB, true);\r\nend;\r\n\r\n--3.根据sid查询出session信息\r\nselect SID,SERIAL# from V$Session where SID=&sid;\r\n\r\n--4.Kill Session\r\nalter system kill session '&sid,&serial';");
         }
 
+        //常用查询：终止JOB运行
         private void MostUsedSql_WhichJob()
         {
             CreateSqlWindow("select job,last_date,last_sec,next_sec,total_time,interval,what from user_jobs\r\nwhere what like '%&PROCNAME%' or what like upper('%&PROCNAME%')");
             idePerformCallback(1);
         }
 
+        //常用查询：存储过程写在哪个JOB
         private void MostUsedSql_ProcRunning()
         {
             CreateSqlWindow("select * from v$db_object_cache where type like 'PROCE%' and locks >0 and pins >0;");
             idePerformCallback(1);
-        } 
+        }
+
+        //常用查询：表在哪个存储过程创建
         private void MostUsedSql_TableInWhichProc()
         {
             CreateSqlWindow("SELECT DISTINCT * FROM user_source WHERE TYPE = 'PROCEDURE' AND upper(text) LIKE '%CREATE TABLE%&TABLENAME%';");
             idePerformCallback(1);
         }
 
+        //刷新设置项，重新读取配置文件
         public void RefreshSetting()
         {
             var iniDataParser = new FileIniDataParser();
             settings = iniDataParser.ReadFile(pluginSettingFile);
         }
+
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
+
     }
 }  

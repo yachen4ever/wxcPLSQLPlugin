@@ -110,6 +110,7 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Definitions.cs" />
     <Compile Include="Exceptions\ParsingException.cs" />
     <Compile Include="FileIniParser.cs" />
     <Compile Include="Helpers\Assert.cs" />
