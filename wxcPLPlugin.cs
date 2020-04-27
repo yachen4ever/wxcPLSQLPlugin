@@ -37,7 +37,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "0.1Alpha";
+        public static string pluginVersion = "0.2Alpha 20200427";
 
         //INIParser
         public static IniData settings;
@@ -451,7 +451,7 @@ namespace wxcPLSQLPlugin
         [DllExport("AfterStart", CallingConvention = CallingConvention.Cdecl)]
         public static void AfterStart()
         {
-            if (string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
+            if (!string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
             {
                 int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
                 if (intWindowType > 0)
