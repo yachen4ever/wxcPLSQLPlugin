@@ -351,7 +351,7 @@ namespace wxcPLSQLPlugin
         {
             ideSplashCreateCallback(100);
             ideSplashWriteLnCallback("");
-            ideSplashWriteCallback("加载wxcPQPlugin插件中： ");
+            ideSplashWriteLnCallback("加载wxcPQPlugin插件中, 插件版本：" + thisPlugin.GetPluginVersion());
             ideSplashWriteLnCallback("PL/SQL版本： " + sysVersionCallback().ToString());
             pluginRoot = sysRootDirCallback() + @"\Plugins\";
             pluginSettingFile = pluginRoot + "wxcPQPlugin.ini";

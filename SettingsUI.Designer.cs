@@ -31,9 +31,11 @@
             this.components = new System.ComponentModel.Container();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.comboBoxAskOnClosing = new System.Windows.Forms.ComboBox();
             this.comboBoxAfterExecute = new System.Windows.Forms.ComboBox();
             this.comboBoxStartup = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.fileSystemWatcher1 = new System.IO.FileSystemWatcher();
@@ -41,8 +43,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.comboBoxAskOnClosing = new System.Windows.Forms.ComboBox();
+            this.checkBoxMaximizeWindow = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
@@ -63,6 +64,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.checkBoxMaximizeWindow);
             this.tabPage1.Controls.Add(this.comboBoxAskOnClosing);
             this.tabPage1.Controls.Add(this.comboBoxAfterExecute);
             this.tabPage1.Controls.Add(this.comboBoxStartup);
@@ -77,6 +79,18 @@
             this.tabPage1.Text = " 启动设置 ";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // comboBoxAskOnClosing
+            // 
+            this.comboBoxAskOnClosing.FormattingEnabled = true;
+            this.comboBoxAskOnClosing.Items.AddRange(new object[] {
+            "默认（发生变动则提示）",
+            "永远提示",
+            "永远不提示"});
+            this.comboBoxAskOnClosing.Location = new System.Drawing.Point(336, 162);
+            this.comboBoxAskOnClosing.Name = "comboBoxAskOnClosing";
+            this.comboBoxAskOnClosing.Size = new System.Drawing.Size(403, 39);
+            this.comboBoxAskOnClosing.TabIndex = 1;
+            // 
             // comboBoxAfterExecute
             // 
             this.comboBoxAfterExecute.FormattingEnabled = true;
@@ -84,7 +98,7 @@
             "不自动Commit",
             "提示是否需要Commit",
             "自动Commit（在PLSQL14还会提示）"});
-            this.comboBoxAfterExecute.Location = new System.Drawing.Point(264, 105);
+            this.comboBoxAfterExecute.Location = new System.Drawing.Point(336, 105);
             this.comboBoxAfterExecute.Name = "comboBoxAfterExecute";
             this.comboBoxAfterExecute.Size = new System.Drawing.Size(403, 39);
             this.comboBoxAfterExecute.TabIndex = 1;
@@ -101,7 +115,7 @@
             "Plan Window",
             "Report Window",
             "HTML Window"});
-            this.comboBoxStartup.Location = new System.Drawing.Point(264, 48);
+            this.comboBoxStartup.Location = new System.Drawing.Point(336, 48);
             this.comboBoxStartup.Name = "comboBoxStartup";
             this.comboBoxStartup.Size = new System.Drawing.Size(403, 39);
             this.comboBoxStartup.TabIndex = 1;
@@ -109,16 +123,25 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(72, 108);
+            this.label2.Location = new System.Drawing.Point(28, 113);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(204, 31);
             this.label2.TabIndex = 0;
             this.label2.Text = "执行SQL语句后：";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(28, 170);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(302, 31);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "关闭程序时是否提示保存：";
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(72, 48);
+            this.label1.Location = new System.Drawing.Point(28, 48);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(158, 31);
             this.label1.TabIndex = 0;
@@ -177,26 +200,15 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // label3
+            // checkBoxMaximizeWindow
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(72, 170);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(158, 31);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "启动时打开：";
-            // 
-            // comboBoxAskOnClosing
-            // 
-            this.comboBoxAskOnClosing.FormattingEnabled = true;
-            this.comboBoxAskOnClosing.Items.AddRange(new object[] {
-            "默认（发生变动则提示）",
-            "永远提示",
-            "永远不提示"});
-            this.comboBoxAskOnClosing.Location = new System.Drawing.Point(264, 167);
-            this.comboBoxAskOnClosing.Name = "comboBoxAskOnClosing";
-            this.comboBoxAskOnClosing.Size = new System.Drawing.Size(403, 39);
-            this.comboBoxAskOnClosing.TabIndex = 1;
+            this.checkBoxMaximizeWindow.AutoSize = true;
+            this.checkBoxMaximizeWindow.Location = new System.Drawing.Point(34, 239);
+            this.checkBoxMaximizeWindow.Name = "checkBoxMaximizeWindow";
+            this.checkBoxMaximizeWindow.Size = new System.Drawing.Size(238, 35);
+            this.checkBoxMaximizeWindow.TabIndex = 2;
+            this.checkBoxMaximizeWindow.Text = "默认最大化子窗口";
+            this.checkBoxMaximizeWindow.UseVisualStyleBackColor = true;
             // 
             // SettingsUI
             // 
@@ -235,5 +247,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBoxAskOnClosing;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox checkBoxMaximizeWindow;
     }
 }
