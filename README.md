@@ -10,9 +10,12 @@
 5. 添加/去除注释（针对行、代码块、行中的一部分）
 6. 自动Commit （软件自带有，提供个设置）
 7. 插件设置界面
+8. 一些Oracle自身的常用SQL查询（如锁表、终止JOB等）
+9. 打开PL/SQL时最大化窗口，打开子窗口时最大化子窗口
 
 ## Todo List
 1. 比自带的自动替换更好用的Auto Replace功能，可自定义替换按键
+2. 一个字段模糊匹配查询功能
 
 
 ## Better Experience
@@ -22,14 +25,16 @@
 
 ## Known Bugs
 1. UnEscapeSentence时如果拼接的不是变量而是用到了Oracle函数，里面可能还会有单引号，括号。这种情况UnEscape不正常
+2. 自动Commit不提示的情况貌似不太正常
 
 ## What Differs it from CnPlugin
  CnPlugin是本插件的启发来源，该插件有以下问题：
 1. 非开源，无法fork，在已有基础上增删功能，使得我必须重写
 2. 时间陈旧，最新版本1.5.5更新于2011年5月，年久失修，bug无人解决
 3. 1.5.1之后的版本与Win8、Win10有严重兼容性问题，基本无法使用
+4. 自己开发的东西当然随心所欲
 
 ## Thanks
 1. (CnPlugin)[http://blog.sina.com.cn/marcconverter]
 2. (DllExport)[https://github.com/3F/DllExport]
-3. (Newtonsoft.Json)[https://github.com/JamesNK/Newtonsoft.Json]
+3. (Ini-Parser)[https://github.com/rickyah/ini-parser]
