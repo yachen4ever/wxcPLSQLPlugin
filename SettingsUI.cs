@@ -110,11 +110,11 @@ namespace wxcPLSQLPlugin
             //最大化子窗口
             if (string.IsNullOrEmpty(settings["Startup"]["MaximizeChildWindow"]))
             {
-                checkBoxMaximizeWindow.Checked = false;
+                checkBoxMaximizeChildWindow.Checked = false;
             }
             else
             {
-                checkBoxMaximizeWindow.Checked = (int.Parse(settings["Startup"]["MaximizeChildWindow"]) == 1) ? true : false;
+                checkBoxMaximizeChildWindow.Checked = (int.Parse(settings["Startup"]["MaximizeChildWindow"]) == 1) ? true : false;
             }
 
         }

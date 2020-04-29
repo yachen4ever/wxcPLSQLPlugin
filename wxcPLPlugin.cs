@@ -41,7 +41,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "0.2Alpha 20200427";
+        public static string pluginVersion = "0.3Alpha 20200429";
 
         //INIParser
         public static IniData settings;
@@ -400,13 +400,6 @@ namespace wxcPLSQLPlugin
                 ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
 
-            //最大化PL/SQL窗口
-            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]) && settings["Startup"]["MaximizeWindow"] == "1")
-            {
-                //获取当前子窗口句柄
-                IntPtr windowHandle = ideGetWindowHandleCallback();
-                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
-            }
         }
 
         [DllExport("AfterExecuteWindow", CallingConvention = CallingConvention.Cdecl)]
@@ -487,6 +480,7 @@ namespace wxcPLSQLPlugin
         [DllExport("AfterStart", CallingConvention = CallingConvention.Cdecl)]
         public static void AfterStart()
         {
+            //默认打开的窗口
             if (!string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
             {
                 int intWindowType = int.Parse(settings["Startup"]["OpenWindowType"]);
@@ -494,6 +488,14 @@ namespace wxcPLSQLPlugin
                 {
                     ideCreateWindowCallback(intWindowType, "", false);
                 }
+            }
+
+            //最大化PL/SQL窗口
+            if (!string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]) && settings["Startup"]["MaximizeWindow"] == "1")
+            {
+                //获取当前子窗口句柄
+                IntPtr windowHandle = ideGetWindowHandleCallback();
+                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
         }
 
