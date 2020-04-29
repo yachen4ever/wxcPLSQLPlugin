@@ -1,11 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace wxcPLSQLPlugin
 {
+    #region 委托回调方法定义
+
+    //序号1，获得PL/SQL Developer版本信息
+    delegate int SysVersion();
+    //序号3，获得PL/SQL Developer根路径
+    delegate string SysRootDir();
+    //序号16，获得当前PL/SQL窗口的句柄
+    delegate IntPtr IdeGetWindowHandle();
+    //序号18，获得当前激活子窗口的句柄
+    delegate IntPtr IdeGetChildHandle();
+    //序号20，创建窗口
+    delegate void IdeCreateWindow(int windowType, string text, [MarshalAs(UnmanagedType.Bool)] bool execute);
+    //序号30，获得窗口中的值
+    delegate string IdeGetText();
+    //序号31，获得窗口中选中的值
+    delegate string IdeGetSelectedText();
+    //序号34，设置窗口中的值
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdeSetText(string text);
+    //序号39，执行特定操作
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdePerform(int Param);
+    //序号40，执行SQL语句
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlExecute(string SQL);
+    //序号90，新建登录界面（会自动替换原有并加上进度条)
+    delegate void IdeSplashCreate(int progressMax);
+    //序号92，改变登录界面文字
+    delegate void IdeSplashWrite(string s);
+    //序号93，改变登录界面文字+换行
+    delegate void IdeSplashWriteLn(string s);
+
+    #endregion 委托回调方法定义
+
+    #region 枚举定义
+    //声明WinAPI:ShowWindow的参数列表
     enum ShowWindowCommands
     {
         /// <summary>
@@ -77,4 +107,8 @@ namespace wxcPLSQLPlugin
         /// </summary>
         ForceMinimize = 11
     }
+
+    #endregion 枚举定义
+
+
 }

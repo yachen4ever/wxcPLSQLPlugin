@@ -7,36 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace wxcPLSQLPlugin
 {
-    //声明引入回调方法
-
-    //序号1，获得PL/SQL Developer版本信息
-    delegate int SysVersion();
-    //序号3，获得PL/SQL Developer根路径
-    delegate string SysRootDir();
-    //序号16，获得当前PL/SQL窗口的句柄
-    delegate IntPtr IdeGetWindowHandle();
-    //序号18，获得当前激活子窗口的句柄
-    delegate IntPtr IdeGetChildHandle();
-    //序号20，创建窗口
-    delegate void IdeCreateWindow(int windowType, string text, [MarshalAs(UnmanagedType.Bool)] bool execute);
-    //序号30，获得窗口中的值
-    delegate string IdeGetText();
-    //序号31，获得窗口中选中的值
-    delegate string IdeGetSelectedText();
-    //序号34，设置窗口中的值
-    [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdeSetText(string text);
-    //序号39，执行特定操作
-    [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdePerform(int Param);
-    //序号40，执行SQL语句
-    [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlExecute(string SQL);
-    //序号90，新建登录界面（会自动替换原有并加上进度条)
-    delegate void IdeSplashCreate(int progressMax);
-    //序号92，改变登录界面文字
-    delegate void IdeSplashWrite(string s);
-    //序号93，改变登录界面文字+换行
-    delegate void IdeSplashWriteLn(string s);
-
-
     public class wxcPLSQLPlugin
     {
         //插件信息
@@ -59,25 +29,27 @@ namespace wxcPLSQLPlugin
         private static wxcPLSQLPlugin thisPlugin;
         private int thispluginId;
 
-        //菜单项定义
-        private const int MENU_INDEX_START = 1;
-        private const int MENU_INDEX_GROUP_FUNCTION = 2;
-        private const int MENU_INDEX_HELLOWORLD = 3;
-        private const int MENU_INDEX_WHEREIN = 4;
-        private const int MENU_INDEX_ESCAPE = 5;
-        private const int MENU_INDEX_UNESCAPE = 6;
-        private const int MENU_INDEX_COMMENT = 7;
-        private const int MENU_INDEX_GROUP_MOST_USED_SQL = 70;
-        private const int MENU_INDEX_SQL_LOCKEDTABLE = 71;
-        private const int MENU_INDEX_SQL_PROCRUNNING = 72;
-        private const int MENU_INDEX_SQL_STOPJOB = 73;
-        private const int MENU_INDEX_SQL_WHICHJOB = 74;
-        private const int MENU_INDEX_SQL_TABLEINWHICHPROC = 75;
-        private const int MENU_INDEX_GROUP_ABOUT = 90;
-        private const int MENU_INDEX_SETTINGSFORM = 98;
-        private const int MENU_INDEX_ABOUTFORM = 99;
+        #region 菜单项定义
+        const int MENU_INDEX_START = 1;
+        const int MENU_INDEX_GROUP_FUNCTION = 2;
+        const int MENU_INDEX_HELLOWORLD = 3;
+        const int MENU_INDEX_WHEREIN = 4;
+        const int MENU_INDEX_ESCAPE = 5;
+        const int MENU_INDEX_UNESCAPE = 6;
+        const int MENU_INDEX_COMMENT = 7;
+        const int MENU_INDEX_GROUP_MOST_USED_SQL = 70;
+        const int MENU_INDEX_SQL_LOCKEDTABLE = 71;
+        const int MENU_INDEX_SQL_PROCRUNNING = 72;
+        const int MENU_INDEX_SQL_STOPJOB = 73;
+        const int MENU_INDEX_SQL_WHICHJOB = 74;
+        const int MENU_INDEX_SQL_TABLEINWHICHPROC = 75;
+        const int MENU_INDEX_GROUP_ABOUT = 90;
+        const int MENU_INDEX_SETTINGSFORM = 98;
+        const int MENU_INDEX_ABOUTFORM = 99;
+        #endregion 菜单项定义
 
-        //回调方法定义                             命名规范:驼峰函数名+Callback
+        #region 回调方法定义
+        //命名规范:驼峰函数名+Callback
         //同时，每个回调方法都有PL/SQL约定好的index。  命名规范:CONST_CB_函数名
         private static SysVersion sysVersionCallback;
         private const int CONST_CB_SYS_VERSION = 1;
@@ -117,6 +89,8 @@ namespace wxcPLSQLPlugin
 
         private static IdeSplashWriteLn ideSplashWriteLnCallback;
         private const int CONST_CB_IDE_SPLASHWRITELN = 93;
+
+        #endregion 回调方法定义
 
         //插件名
         public string Name
@@ -397,7 +371,7 @@ namespace wxcPLSQLPlugin
             {
                 //获取当前子窗口句柄
                 IntPtr windowHandle = ideGetChildHandleCallback();
-                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
+                Win32API.ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
 
         }
@@ -495,7 +469,7 @@ namespace wxcPLSQLPlugin
             {
                 //获取当前子窗口句柄
                 IntPtr windowHandle = ideGetWindowHandleCallback();
-                ShowWindow(windowHandle, ShowWindowCommands.Maximize);
+                Win32API.ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
         }
 
@@ -974,11 +948,6 @@ namespace wxcPLSQLPlugin
             var iniDataParser = new FileIniDataParser();
             settings = iniDataParser.ReadFile(pluginSettingFile);
         }
-
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
 
     }
 }  

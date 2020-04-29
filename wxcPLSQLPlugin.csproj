@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="StreamIniDataParser.cs" />
     <Compile Include="StringIniParser.cs" />
+    <Compile Include="Win32API.cs" />
     <Compile Include="wxcPLPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
