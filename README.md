@@ -19,7 +19,7 @@
 
 
 ## Better Experience
-1. wherexin功能直接从剪切板拉取数据
+1. [已完成]wherexin功能直接从剪切板拉取数据
 2. [已基本完成]去除Execute Immediate还没有做到字符串内拼接的变量名自动变成&变量
 3. 代码块和存储过程的转换？值得考虑
 

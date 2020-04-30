@@ -12,5 +12,6 @@ namespace wxcPLSQLPlugin
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
+
     }
 }

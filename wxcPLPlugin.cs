@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace wxcPLSQLPlugin
 {
@@ -11,7 +12,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "0.3Alpha 20200429";
+        public static string pluginVersion = "Alpha0.5 Builddate20200430";
 
         //INIParser
         public static IniData settings;
@@ -486,21 +487,41 @@ namespace wxcPLSQLPlugin
         public void HandleWhereInX()
         {
             //先拉文本
-            string strToBeHandled = ideGetSelectedTextCallback();
+            //选中的文本
+            string strSelected = ideGetSelectedTextCallback();
+            //文本框全部文本
             string strAll = ideGetTextCallback();
-            //如果根本就没有文本直接退出
-            if (string.IsNullOrWhiteSpace(strAll))
+            //剪切板的文本
+            string strClip = "";
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData.GetDataPresent(DataFormats.Text))
             {
-                return;
+                strClip = (string)iData.GetData(DataFormats.Text);
             }
-            //标识是否为选中的文本
-            bool flagIsSelected = true;
-            //如果没有选中文本，则处理全部文本，同时表示flagSelected为否
-            if (string.IsNullOrWhiteSpace(strToBeHandled))
+
+            //要处理的文本
+            string strToBeHandled = "";
+            int flagWho = 0;
+            //处理优先级:选中的>剪切板>全部
+            if (!string.IsNullOrWhiteSpace(strSelected))
             {
-                flagIsSelected = false;
-                strToBeHandled = strAll;
+                strToBeHandled = strSelected;
+                flagWho = 1;
             }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(strClip))
+                {
+                    strToBeHandled = strClip;
+                    flagWho = 2;
+                }
+                else
+                {
+                    strToBeHandled = strAll;
+                    flagWho = 3;
+                }
+            }
+
             //定义处理后的文本
             string strAfterHandle = "(";
             //标识一下需不需要逗号
@@ -528,18 +549,22 @@ namespace wxcPLSQLPlugin
                 }
             }
             strAfterHandle += ")";
-
+            string strGiveBack = "";
             //如果没有选中文本直接输出全部文本
-            if (!flagIsSelected)
+            switch(flagWho)
             {
-                ideSetTextCallback(strAfterHandle);
+                case 1:
+                    ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
+                    break;
+                case 2:
+                    ideSetTextCallback(strAll + strAfterHandle);
+                    break;
+                case 3:
+                    ideSetTextCallback(strAfterHandle);
+                    break;
+                default:
+                    break;
             }
-            //否则在strAll里替换一下输出回去
-            else
-            {
-                ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
-            }
-
         }
 
         //Escape一句SQL
