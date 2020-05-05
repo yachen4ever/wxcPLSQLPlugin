@@ -9,6 +9,8 @@ namespace wxcPLSQLPlugin
     {
         private wxcPLSQLPlugin plugin;
         private string pluginSettingFile;
+        private IniData settings;
+        private FileIniDataParser parser;
         public SettingsUI()
         {
             InitializeComponent();
@@ -22,51 +24,51 @@ namespace wxcPLSQLPlugin
         }
 
         //取消
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonCancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
         //确定
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonOK_Click(object sender, EventArgs e)
         {
-            button3_Click(sender, e);
+            buttonApply_Click(sender, e);
             this.Close();
 
         }
 
         //应用
-        private void button3_Click(object sender, EventArgs e)
+        private void buttonApply_Click(object sender, EventArgs e)
         {
-            var parser = new FileIniDataParser();
-            IniData settingsToBeSaved = new IniData();
-
             //启动时打开窗口
-            settingsToBeSaved["Startup"]["OpenWindowType"] = comboBoxStartup.SelectedIndex.ToString();
+            settings["Startup"]["OpenWindowType"] = comboBoxStartup.SelectedIndex.ToString();
 
             //自动Commit
-            settingsToBeSaved["Function"]["AutoCommit"] = comboBoxAfterExecute.SelectedIndex.ToString();
+            settings["Function"]["AutoCommit"] = comboBoxAfterExecute.SelectedIndex.ToString();
 
             //关闭时提示修改是否保存
-            settingsToBeSaved["Other"]["AskOnClosing"] = comboBoxAskOnClosing.SelectedIndex.ToString();
+            settings["Other"]["AskOnClosing"] = comboBoxAskOnClosing.SelectedIndex.ToString();
 
             //默认最大化PL/SQL窗口
-            settingsToBeSaved["Startup"]["MaximizeWindow"] = checkBoxMaximizeWindow.Checked ? "1" : "0";
+            settings["Startup"]["MaximizeWindow"] = checkBoxMaximizeWindow.Checked ? "1" : "0";
 
             //默认最大化PL/SQL窗口
-            settingsToBeSaved["Startup"]["MaximizeChildWindow"] = checkBoxMaximizeChildWindow.Checked ? "1" : "0";
+            settings["Startup"]["MaximizeChildWindow"] = checkBoxMaximizeChildWindow.Checked ? "1" : "0";
+
+            //启用自动替换
+            settings["Startup"]["EnableAutoReplace"] = checkBoxEnableAutoReplace.Checked ? "1" : "0";
 
             //写入配置文件
-            parser.WriteFile(pluginSettingFile, settingsToBeSaved);
-
+            parser.WriteFile(pluginSettingFile, settings);
+           
             plugin.RefreshSetting();
         }
 
         //加载事件
         private void SettingsUI_Load(object sender, EventArgs e)
         {
-            var parser = new FileIniDataParser();
-            IniData settings = parser.ReadFile(pluginSettingFile);
+            parser = new FileIniDataParser();
+            settings = parser.ReadFile(pluginSettingFile);
 
             //启动时打开窗口
             if (string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
@@ -118,6 +120,37 @@ namespace wxcPLSQLPlugin
                 checkBoxMaximizeChildWindow.Checked = (int.Parse(settings["Startup"]["MaximizeChildWindow"]) == 1) ? true : false;
             }
 
+            //启用自动替换
+            if (string.IsNullOrEmpty(settings["Startup"]["EnableAutoReplace"]))
+            {
+                checkBoxEnableAutoReplace.Checked = false;
+            }
+            else
+            {
+                checkBoxEnableAutoReplace.Checked = (int.Parse(settings["Startup"]["EnableAutoReplace"]) == 1) ? true : false;
+            }
+
+            //自动替换界面初始化
+            foreach (KeyData kv in settings["AutoReplace"])
+            {
+                listBoxAutoReplaceKey.Items.Add(kv.KeyName);
+            }
+            //如果有直接选中第一个
+            if (listBoxAutoReplaceKey.Items.Count > 0)
+            {
+                listBoxAutoReplaceKey.SelectedIndex = 0;
+            }
         }
+
+        private void listBoxAutoReplaceKey_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBoxAutoReplaceValue.Text = settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()];
+        }
+
+        private void textBoxAutoReplaceValue_TextChanged(object sender, EventArgs e)
+        {
+            settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()] = textBoxAutoReplaceValue.Text;
+        }
+
     }
 }

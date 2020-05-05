@@ -12,7 +12,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "Alpha0.61 Builddate20200505";
+        public static string pluginVersion = "1.0 Build20200505";
 
         //INIParser
         public static IniData settings;
@@ -375,17 +375,21 @@ namespace wxcPLSQLPlugin
                 settings = iniDataParser.ReadFile(pluginSettingFile);
 
                 //更新旧版本缺少的设置
-                if (string.IsNullOrEmpty(settings["StartUp"]["OpenWindowType"]))
+                if (string.IsNullOrEmpty(settings["Startup"]["OpenWindowType"]))
                 {
-                    settings["StartUp"]["OpenWindowType"] = "1";
+                    settings["Startup"]["OpenWindowType"] = "1";
                 }
-                if (string.IsNullOrEmpty(settings["StartUp"]["MaximizeWindow"]))
+                if (string.IsNullOrEmpty(settings["Startup"]["MaximizeWindow"]))
                 {
-                    settings["StartUp"]["MaximizeWindow"] = "1";
+                    settings["Startup"]["MaximizeWindow"] = "1";
                 }
-                if (string.IsNullOrEmpty(settings["StartUp"]["MaximizeChildWindow"]))
+                if (string.IsNullOrEmpty(settings["Startup"]["MaximizeChildWindow"]))
                 {
-                    settings["StartUp"]["MaximizeChildWindow"] = "1";
+                    settings["Startup"]["MaximizeChildWindow"] = "1";
+                }
+                if (string.IsNullOrEmpty(settings["Startup"]["EnableAutoReplace"]))
+                {
+                    settings["Startup"]["EnableAutoReplace"] = "1";
                 }
                 if (string.IsNullOrEmpty(settings["Function"]["AutoCommit"]))
                 {
@@ -417,6 +421,7 @@ namespace wxcPLSQLPlugin
                     settings["AutoReplace"]["bb"] = "bengbu.";
                 }
 
+                iniDataParser.WriteFile(pluginSettingFile, settings);
             }
             else
             {
@@ -429,7 +434,7 @@ namespace wxcPLSQLPlugin
 
         }
 
-        //OnWindowCreated事件方法
+        //子窗口创建完毕事件方法
         [DllExport("OnWindowCreated", CallingConvention = CallingConvention.Cdecl)]
         public static void OnWindowCreated(int WindowType)
         {
@@ -440,40 +445,44 @@ namespace wxcPLSQLPlugin
                 IntPtr windowHandle = ideGetChildHandleCallback();
                 Win32API.ShowWindow(windowHandle, ShowWindowCommands.Maximize);
             }
-            //获得当前窗口编辑框的句柄
-            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
-            //通过句柄获得线程id
-            var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
-            //如果有钩子先释放
-            if (autoReplaceHook != IntPtr.Zero)
+            //生成自动替换钩子
+            if (!string.IsNullOrEmpty(settings["Startup"]["EnableAutoReplace"]) && settings["Startup"]["EnableAutoReplace"] == "1")
             {
-                Win32API.UnhookWindowsHookEx(autoReplaceHook);
-                autoReplaceHook = IntPtr.Zero;
+                //获得当前窗口编辑框的句柄
+                IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+                //通过句柄获得线程id
+                var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
+                //如果有钩子先释放
+                if (autoReplaceHook != IntPtr.Zero)
+                {
+                    Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                    autoReplaceHook = IntPtr.Zero;
+                }
+                //挂钩
+                autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
             }
-            //挂钩
-            autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
         }
 
-        //关闭子窗口事件方法。返回值为0时默认（应该和1相同），为1时询问是否保存，为2时关闭时不询问直接退出
+        //子窗口焦点变更事件方法。
         [DllExport("OnWindowChange", CallingConvention = CallingConvention.Cdecl)]
         public static void OnWindowChange()
         {
-            if (autoReplaceHook != IntPtr.Zero)
+            // 生成自动替换钩子
+            if (!string.IsNullOrEmpty(settings["Startup"]["EnableAutoReplace"]) && settings["Startup"]["EnableAutoReplace"] == "1")
             {
-                Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                //获得当前窗口编辑框的句柄
+                IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+                //通过句柄获得线程id
+                var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
+                //如果有钩子先释放
+                if (autoReplaceHook != IntPtr.Zero)
+                {
+                    Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                    autoReplaceHook = IntPtr.Zero;
+                }
+                //挂钩
+                autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
             }
-            //获得当前窗口编辑框的句柄
-            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
-            //通过句柄获得线程id
-            var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);       
-            //如果有钩子先释放
-            if (autoReplaceHook != IntPtr.Zero)
-            {
-                Win32API.UnhookWindowsHookEx(autoReplaceHook);
-                autoReplaceHook = IntPtr.Zero;
-            }
-            //挂钩
-            autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
         }
 
         //关闭子窗口事件方法。返回值为0时默认（应该和1相同），为1时询问是否保存，为2时关闭时不询问直接退出

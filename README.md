@@ -12,17 +12,18 @@
 7. 插件设置界面
 8. 一些Oracle自身的常用SQL查询（如锁表、终止JOB等）
 9. 打开PL/SQL时最大化窗口，打开子窗口时最大化子窗口
+10. 比自带的自动替换更好用的Auto Replace功能，使用Tab激活
 
 ## Todo List
-1. 比自带的自动替换更好用的Auto Replace功能，可自定义替换按键
-2. 一个字段模糊匹配查询功能
-3. 将窗口改为单例模式
-
+1. 一个字段模糊匹配查询功能
+2. 将窗口改为单例模式
 
 ## Better Experience
 1. [已完成]wherexin功能直接从剪切板拉取数据
 2. [已基本完成]去除Execute Immediate还没有做到字符串内拼接的变量名自动变成&变量
 3. 代码块和存储过程的转换？值得考虑
+4. 自动替换可自定义按键
+5. 自动替换可修改替换后光标位置
 
 ## Known Bugs
 1. UnEscapeSentence时如果拼接的不是变量而是用到了Oracle函数，里面可能还会有单引号，括号。这种情况UnEscape不正常
@@ -39,3 +40,7 @@
 1. (CnPlugin)[http://blog.sina.com.cn/marcconverter]
 2. (DllExport)[https://github.com/3F/DllExport]
 3. (Ini-Parser)[https://github.com/rickyah/ini-parser]
+
+## Update Log
+
+2020-05-05： 完成自动替换功能，正式发布1.0版本

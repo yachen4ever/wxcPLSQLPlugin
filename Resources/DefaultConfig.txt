@@ -2,6 +2,7 @@
 OpenWindowType=1
 MaximizeWindow=1
 MaximizeChildWindow=1
+EnableAutoReplace=1
 
 [Function]
 AutoCommit=1
@@ -12,6 +13,12 @@ AskOnClosing=2
 [AutoReplace]
 sf=select * from 
 w=where 
+o=order by
+g=group by
+m=merge into
 sn=service_nbr
 an=acc_nbr
 bb=bengbu.
+lbdu=lbdu_developer_info
+dn=developer_name
+dc=developer_code
