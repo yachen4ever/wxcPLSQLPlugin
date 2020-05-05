@@ -8,3 +8,6 @@ AutoCommit=1
 
 [Other]
 AskOnClosing=2
+
+[AutoReplace]
+sf=select * from

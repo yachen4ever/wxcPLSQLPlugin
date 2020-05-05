@@ -32,6 +32,7 @@ namespace wxcPLSQLPlugin
         {
             button3_Click(sender, e);
             this.Close();
+
         }
 
         //应用

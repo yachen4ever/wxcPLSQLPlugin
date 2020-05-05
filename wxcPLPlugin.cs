@@ -12,7 +12,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "Alpha0.5 Builddate20200430";
+        public static string pluginVersion = "Alpha0.6 Builddate20200505";
 
         //INIParser
         public static IniData settings;
@@ -73,9 +73,18 @@ namespace wxcPLSQLPlugin
         private static IdeGetSelectedText ideGetSelectedTextCallback;
         private const int CONST_CB_IDE_GETSELECTEDTEXT = 31;
 
+        private static IdeGetCursorWord ideGetCursorWordCallback;
+        private const int CONST_CB_IDE_GETCURSORWORD = 32;
+
+        private static IdeGetEditorHandle ideGetEditorHandleCallback;
+        private const int CONST_CB_IDE_GETEDITORHANDLE = 33;
+
         private static IdeSetText ideSetTextCallback;
-        private const int CONST_CB_IDE_SETTEXT = 34; 
-        
+        private const int CONST_CB_IDE_SETTEXT = 34;
+
+        private static IdeGetCursorWordPosition ideGetCursorWordPositionCallback;
+        private const int CONST_CB_IDE_GETCURSORWORDPOSITION = 38;
+
         private static IdePerform idePerformCallback;
         private const int CONST_CB_IDE_PERFORM = 39;
 
@@ -90,6 +99,8 @@ namespace wxcPLSQLPlugin
 
         private static IdeSplashWriteLn ideSplashWriteLnCallback;
         private const int CONST_CB_IDE_SPLASHWRITELN = 93;
+
+        private static HookProc autoReplaceHookProc = new HookProc(AutoReplaceHookProcCallback);
 
         #endregion 回调方法定义
 
@@ -250,7 +261,7 @@ namespace wxcPLSQLPlugin
             switch (index)
             {
                 case MENU_INDEX_HELLOWORLD:
-                    thisPlugin.CreateSqlWindow("select 'Hello world!' from dual");
+                    thisPlugin.OutputEditorHandle();
                     break;
                 case MENU_INDEX_WHEREIN:
                     thisPlugin.HandleWhereInX();
@@ -314,9 +325,18 @@ namespace wxcPLSQLPlugin
                     break;
                 case CONST_CB_IDE_GETSELECTEDTEXT:
                     ideGetSelectedTextCallback = (IdeGetSelectedText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetSelectedText));
-                    break;              
+                    break;
+                case CONST_CB_IDE_GETCURSORWORD:
+                    ideGetCursorWordCallback = (IdeGetCursorWord)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetCursorWord));
+                    break;
+                case CONST_CB_IDE_GETEDITORHANDLE:
+                    ideGetEditorHandleCallback = (IdeGetEditorHandle)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetEditorHandle));
+                    break;
                 case CONST_CB_IDE_SETTEXT:
                     ideSetTextCallback = (IdeSetText)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSetText));
+                    break;
+                case CONST_CB_IDE_GETCURSORWORDPOSITION:
+                    ideGetCursorWordPositionCallback = (IdeGetCursorWordPosition)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetCursorWordPosition));
                     break;
                 case CONST_CB_IDE_PERFORM:
                     idePerformCallback = (IdePerform)Marshal.GetDelegateForFunctionPointer(function, typeof(IdePerform));
@@ -373,6 +393,9 @@ namespace wxcPLSQLPlugin
                 //获取当前子窗口句柄
                 IntPtr windowHandle = ideGetChildHandleCallback();
                 Win32API.ShowWindow(windowHandle, ShowWindowCommands.Maximize);
+                IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+                var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
+                Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
             }
 
         }
@@ -549,7 +572,6 @@ namespace wxcPLSQLPlugin
                 }
             }
             strAfterHandle += ")";
-            string strGiveBack = "";
             //如果没有选中文本直接输出全部文本
             switch(flagWho)
             {
@@ -972,6 +994,84 @@ namespace wxcPLSQLPlugin
         {
             var iniDataParser = new FileIniDataParser();
             settings = iniDataParser.ReadFile(pluginSettingFile);
+        }
+
+        //测试向编辑器输出
+        private void OutputEditorHandle()
+        {
+            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+            SendStringMessage(intCurrentEditorHandle, "Hello World");
+            MessageBox.Show(intCurrentEditorHandle.ToString());
+        }
+
+        //在编辑器输出输出一个字符串
+        private static void SendStringMessage(IntPtr intHandle, string text)
+        {
+            for (int i = 0;i < text.Length; i++)
+            {
+                Win32API.SendMessage(intHandle, WM.CHAR, (int)(text[i]), 0);
+            }
+        }
+
+        //在编辑器向前删除n个字符
+        private static void SendBackSpaceNTimes(IntPtr intHandle, int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                //8是BackSpace的ASCII编码
+                //这里需要用WM.KEYDOWN而不是WM.CHAR,因为WM.CHAR是翻译后的字符，详见
+                //https://docs.microsoft.com/zh-cn/windows/win32/inputdev/wm-keydown
+                Win32API.SendMessage(intHandle, WM.KEYDOWN, 8, 0);
+            }
+        }
+
+        //自动替换钩子方法
+        //https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms644984(v=vs.85)?redirectedfrom=MSDN
+        private static IntPtr AutoReplaceHookProcCallback(int code, IntPtr wParam, IntPtr lParam)
+        {
+            //按键后会发现3次调用：code=0;lParam[0]=0一次；code=0;lParam[0]=1一次；code=3;lParam[0]=0一次；
+            //如果code<0按文档要求返回CallNextHookEx
+            if (code < 0)
+            {
+                //you need to call CallNextHookEx without further processing
+                //and return the value returned by CallNextHookEx
+                return Win32API.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
+            }
+            //MessageBox.Show(code.ToString()+"\n"+Convert.ToString((int)lParam, 2));
+            //code=HC_ACTION，包含信息，lParam用来判断第一位是否为0，捕获下判断KeyDown事件
+            //https://docs.microsoft.com/zh-cn/windows/win32/inputdev/about-keyboard-input?redirectedfrom=MSDN#keyboard-focus-and-activation
+            if (code == 0 && ((int)lParam & 0x80000000) == 0)
+            {
+                //把wParam里的按键拉出来
+                Keys keyPressed = (Keys)wParam.ToInt32();
+                if (keyPressed == Keys.Tab)
+                {
+                    //获取当前文本编辑框的句柄
+                    IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+                    //获取当前光标所在的单词
+                    string strCursorWord = ideGetCursorWordCallback();
+                    //获取当前光标所在的单词的位置
+                    int intCursorWordPosition = ideGetCursorWordPositionCallback();
+
+                    //intCursorWordPosition=3意味着当前光标处于所在单词的末尾
+                    if (!string.IsNullOrEmpty(strCursorWord) && intCursorWordPosition == 3)
+                    {
+                        if (!string.IsNullOrEmpty(settings["AutoReplace"][strCursorWord]))
+                        {
+                            //先把要替换的部分删了
+                            SendBackSpaceNTimes(intCurrentEditorHandle, strCursorWord.Length);
+                            //把替换的塞进去
+                            SendStringMessage(intCurrentEditorHandle, settings["AutoReplace"][strCursorWord]);
+                        }
+                        //返回非空值使得键盘键入事件不再传入pl/sql自己处理（打出tab的效果）
+                        return (IntPtr)1;
+                    }
+                    
+                }
+            }
+            
+            //如果不处于可以替换的情况，还把Tab键传回PL/SQL以打出tab
+            return Win32API.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
         }
 
     }

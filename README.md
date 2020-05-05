@@ -16,6 +16,7 @@
 ## Todo List
 1. 比自带的自动替换更好用的Auto Replace功能，可自定义替换按键
 2. 一个字段模糊匹配查询功能
+3. 将窗口改为单例模式
 
 
 ## Better Experience
