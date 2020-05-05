@@ -10,4 +10,8 @@ AutoCommit=1
 AskOnClosing=2
 
 [AutoReplace]
-sf=select * from
+sf=select * from 
+w=where 
+sn=service_nbr
+an=acc_nbr
+bb=bengbu.

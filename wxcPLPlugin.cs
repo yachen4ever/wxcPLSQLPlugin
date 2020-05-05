@@ -12,7 +12,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "Alpha0.6 Builddate20200505";
+        public static string pluginVersion = "Alpha0.61 Builddate20200505";
 
         //INIParser
         public static IniData settings;
@@ -101,6 +101,7 @@ namespace wxcPLSQLPlugin
         private const int CONST_CB_IDE_SPLASHWRITELN = 93;
 
         private static HookProc autoReplaceHookProc = new HookProc(AutoReplaceHookProcCallback);
+        private static IntPtr autoReplaceHook;
 
         #endregion 回调方法定义
 
@@ -356,7 +357,7 @@ namespace wxcPLSQLPlugin
             }
         }
 
-        //OnActivate事件方法。
+        //OnActivate事件方法
         [DllExport("OnActivate", CallingConvention = CallingConvention.Cdecl)]
         public static void OnActivate()
         {
@@ -372,6 +373,50 @@ namespace wxcPLSQLPlugin
                 ideSplashWriteCallback("找到配置文件，读取中...");
                 var iniDataParser = new FileIniDataParser();
                 settings = iniDataParser.ReadFile(pluginSettingFile);
+
+                //更新旧版本缺少的设置
+                if (string.IsNullOrEmpty(settings["StartUp"]["OpenWindowType"]))
+                {
+                    settings["StartUp"]["OpenWindowType"] = "1";
+                }
+                if (string.IsNullOrEmpty(settings["StartUp"]["MaximizeWindow"]))
+                {
+                    settings["StartUp"]["MaximizeWindow"] = "1";
+                }
+                if (string.IsNullOrEmpty(settings["StartUp"]["MaximizeChildWindow"]))
+                {
+                    settings["StartUp"]["MaximizeChildWindow"] = "1";
+                }
+                if (string.IsNullOrEmpty(settings["Function"]["AutoCommit"]))
+                {
+                    settings["Function"]["AutoCommit"] = "1";
+                }
+                if (string.IsNullOrEmpty(settings["Other"]["AskOnClosing"]))
+                {
+                    settings["Other"]["AskOnClosing"] = "2";
+                }
+
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["sf"]))
+                {
+                    settings["AutoReplace"]["sf"] = "select * from ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["w"]))
+                {
+                    settings["AutoReplace"]["w"] = "where ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["sn"]))
+                {
+                    settings["AutoReplace"]["sn"] = "service_nbr";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["an"]))
+                {
+                    settings["AutoReplace"]["an"] = "acc_num";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["bb"]))
+                {
+                    settings["AutoReplace"]["bb"] = "bengbu.";
+                }
+
             }
             else
             {
@@ -384,6 +429,7 @@ namespace wxcPLSQLPlugin
 
         }
 
+        //OnWindowCreated事件方法
         [DllExport("OnWindowCreated", CallingConvention = CallingConvention.Cdecl)]
         public static void OnWindowCreated(int WindowType)
         {
@@ -393,16 +439,81 @@ namespace wxcPLSQLPlugin
                 //获取当前子窗口句柄
                 IntPtr windowHandle = ideGetChildHandleCallback();
                 Win32API.ShowWindow(windowHandle, ShowWindowCommands.Maximize);
-                IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
-                var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
-                Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
             }
-
+            //获得当前窗口编辑框的句柄
+            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+            //通过句柄获得线程id
+            var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);
+            //如果有钩子先释放
+            if (autoReplaceHook != IntPtr.Zero)
+            {
+                Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                autoReplaceHook = IntPtr.Zero;
+            }
+            //挂钩
+            autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
         }
 
+        //关闭子窗口事件方法。返回值为0时默认（应该和1相同），为1时询问是否保存，为2时关闭时不询问直接退出
+        [DllExport("OnWindowChange", CallingConvention = CallingConvention.Cdecl)]
+        public static void OnWindowChange()
+        {
+            if (autoReplaceHook != IntPtr.Zero)
+            {
+                Win32API.UnhookWindowsHookEx(autoReplaceHook);
+            }
+            //获得当前窗口编辑框的句柄
+            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
+            //通过句柄获得线程id
+            var threadId = Win32API.GetWindowThreadProcessId(intCurrentEditorHandle, IntPtr.Zero);       
+            //如果有钩子先释放
+            if (autoReplaceHook != IntPtr.Zero)
+            {
+                Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                autoReplaceHook = IntPtr.Zero;
+            }
+            //挂钩
+            autoReplaceHook = Win32API.SetWindowsHookEx(HookType.WH_KEYBOARD, autoReplaceHookProc, IntPtr.Zero, threadId);
+        }
+
+        //关闭子窗口事件方法。返回值为0时默认（应该和1相同），为1时询问是否保存，为2时关闭时不询问直接退出
+        [DllExport("OnWindowClose", CallingConvention = CallingConvention.Cdecl)]
+        public static int OnWindowClose(int WindowType, [MarshalAs(UnmanagedType.Bool)] bool Changed)
+        {
+            //如果有钩子先释放
+            if (autoReplaceHook != IntPtr.Zero)
+            {
+                Win32API.UnhookWindowsHookEx(autoReplaceHook);
+                autoReplaceHook = IntPtr.Zero;
+            }
+            //如果设置了关闭时的操作则返回设定值
+            if (!string.IsNullOrEmpty(settings["Other"]["AskOnClosing"])) {
+                return int.Parse(settings["Other"]["AskOnClosing"]);
+            }
+            //否则返回默认值0
+            else return 0;
+        }
+
+        //About事件方法。设置PL/SQL插件设置窗口里关于的返回值。
+        [DllExport("About", CallingConvention = CallingConvention.Cdecl)]
+        public static string About()
+        {
+            return " 这是一个为PL/SQL Developer开发的插件，\r\n 用于提供一些PL/SQL缺失的实用功能。\r\n\r\n 开发者信息：\r\n 蚌埠电信分公司 智慧营销中心/IT支撑中心 王旭晨\r\n 联系方式: 18955296958\r\n QQ: 360039166\r\n 项目信息：https://github.com/yachen4ever/wxcPLSQLPlugin \r\n 当前版本：" + pluginVersion;
+        }
+
+        //Configure事件方法。设置PL/SQL插件设置窗口里设置按钮的事件。
+        [DllExport("Configure", CallingConvention = CallingConvention.Cdecl)]
+        public static void Configure()
+        {
+            SettingsUI frm = new SettingsUI();
+            frm.Show(thisPlugin);
+        }
+
+        //AfterExecuteWindow事件方法
         [DllExport("AfterExecuteWindow", CallingConvention = CallingConvention.Cdecl)]
         public static void AfterExecuteWindow(int WindowType, int Result)
         {
+            //WindowType=1为SQL窗口，Result=1为成功执行但结果一页没显示完，Result=2为成功执行
             if (WindowType == 1 && Result > 0)
             {
                 //先拉文本
@@ -446,31 +557,6 @@ namespace wxcPLSQLPlugin
                     }
                 }
             }
-        }
-
-        //关闭窗口事件方法。设置关闭时不要提示保存
-        [DllExport("OnWindowClose", CallingConvention = CallingConvention.Cdecl)]
-        public static int OnWindowClose(int WindowType, [MarshalAs(UnmanagedType.Bool)] bool Changed)
-        {
-            if (!string.IsNullOrEmpty(settings["Other"]["AskOnClosing"])) {
-                return int.Parse(settings["Other"]["AskOnClosing"]);
-            }
-            else return 0;
-        }
-
-        //About事件方法。设置PL/SQL插件设置窗口里关于的返回值。
-        [DllExport("About", CallingConvention = CallingConvention.Cdecl)]
-        public static string About()
-        {
-            return " 这是一个为PL/SQL Developer开发的插件，\r\n 用于提供一些PL/SQL缺失的实用功能。\r\n\r\n 开发者信息：\r\n 蚌埠电信分公司 智慧营销中心/IT支撑中心 王旭晨\r\n 联系方式: 18955296958\r\n QQ: 360039166\r\n 项目信息：https://github.com/yachen4ever/wxcPLSQLPlugin \r\n 当前版本：" + pluginVersion;
-        }
-
-        //Configure事件方法。设置PL/SQL插件设置窗口里设置按钮的事件。
-        [DllExport("Configure", CallingConvention = CallingConvention.Cdecl)]
-        public static void Configure()
-        {
-            SettingsUI frm = new SettingsUI();
-            frm.Show(thisPlugin);
         }
 
         //AfterStart事件方法。触发于PL/SQL加载完所有自身内容和插件后。
