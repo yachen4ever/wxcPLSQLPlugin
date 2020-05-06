@@ -144,13 +144,46 @@ namespace wxcPLSQLPlugin
 
         private void listBoxAutoReplaceKey_SelectedIndexChanged(object sender, EventArgs e)
         {
-            textBoxAutoReplaceValue.Text = settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()];
+            if (listBoxAutoReplaceKey.SelectedItem != null)
+            {
+                textBoxAutoReplaceValue.Text = settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()];
+            }
         }
 
         private void textBoxAutoReplaceValue_TextChanged(object sender, EventArgs e)
         {
-            settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()] = textBoxAutoReplaceValue.Text;
+            if (listBoxAutoReplaceKey.SelectedItem != null)
+            {
+                settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()] = textBoxAutoReplaceValue.Text;
+            }
         }
 
+        private void buttonAddKey_Click(object sender, EventArgs e)
+        {
+            if (textBoxToBeAdded.TextLength > 0)
+            {
+                listBoxAutoReplaceKey.Items.Add(textBoxToBeAdded.Text.Trim());
+                settings["AutoReplace"][textBoxToBeAdded.Text.Trim()] = "";
+                listBoxAutoReplaceKey.SelectedIndex = listBoxAutoReplaceKey.Items.Count - 1;
+            }
+            else
+            {
+                MessageBox.Show("Key不能为空", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textBoxToBeAdded.Focus();
+            }
+        }
+
+        private void buttonDelKey_Click(object sender, EventArgs e)
+        {
+            if (settings["AutoReplace"].ContainsKey(listBoxAutoReplaceKey.SelectedItem.ToString()))
+            {
+                settings["AutoReplace"].RemoveKey(listBoxAutoReplaceKey.SelectedItem.ToString());
+            }
+            if (listBoxAutoReplaceKey.SelectedItem != null && listBoxAutoReplaceKey.SelectedIndex > -1)
+            {
+                listBoxAutoReplaceKey.Items.Remove(listBoxAutoReplaceKey.SelectedItem);
+            }
+        
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.0 Build20200505";
+        public static string pluginVersion = "1.01 Build20200506";
 
         //INIParser
         public static IniData settings;
@@ -408,6 +408,18 @@ namespace wxcPLSQLPlugin
                 {
                     settings["AutoReplace"]["w"] = "where ";
                 }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["o"]))
+                {
+                    settings["AutoReplace"]["o"] = "order by ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["g"]))
+                {
+                    settings["AutoReplace"]["w"] = "group by ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["m"]))
+                {
+                    settings["AutoReplace"]["w"] = "merge into";
+                }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["sn"]))
                 {
                     settings["AutoReplace"]["sn"] = "service_nbr";
@@ -420,7 +432,18 @@ namespace wxcPLSQLPlugin
                 {
                     settings["AutoReplace"]["bb"] = "bengbu.";
                 }
-
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["lbdu"]))
+                {
+                    settings["AutoReplace"]["lbdu"] = "lbdu_developer_info";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["dn"]))
+                {
+                    settings["AutoReplace"]["dn"] = "developer_name";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["dc"]))
+                {
+                    settings["AutoReplace"]["dn"] = "developer_code";
+                }
                 iniDataParser.WriteFile(pluginSettingFile, settings);
             }
             else
