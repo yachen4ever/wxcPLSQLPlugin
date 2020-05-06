@@ -11,13 +11,15 @@ AutoCommit=1
 AskOnClosing=2
 
 [AutoReplace]
-sf=select * from 
+s=select * from 
+i=insert into
+u=update
 w=where 
 o=order by
 g=group by
 m=merge into
 sn=service_nbr
-an=acc_nbr
+an=acc_num
 bb=bengbu.
 lbdu=lbdu_developer_info
 dn=developer_name

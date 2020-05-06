@@ -400,9 +400,17 @@ namespace wxcPLSQLPlugin
                     settings["Other"]["AskOnClosing"] = "2";
                 }
 
-                if (string.IsNullOrEmpty(settings["AutoReplace"]["sf"]))
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["s"]))
                 {
-                    settings["AutoReplace"]["sf"] = "select * from ";
+                    settings["AutoReplace"]["s"] = "select * from ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["i"]))
+                {
+                    settings["AutoReplace"]["i"] = "insert into";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["u"]))
+                {
+                    settings["AutoReplace"]["u"] = "update";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["w"]))
                 {
