@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace wxcPLSQLPlugin
@@ -12,7 +13,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.01 Build20200506";
+        public static string pluginVersion = "1.1 Build20200506";
 
         //INIParser
         public static IniData settings;
@@ -404,6 +405,22 @@ namespace wxcPLSQLPlugin
                 {
                     settings["AutoReplace"]["s"] = "select * from ";
                 }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["sf"]))
+                {
+                    settings["AutoReplace"]["sf"] = "select * from ";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["c"]))
+                {
+                    settings["AutoReplace"]["c"] = "create";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["t"]))
+                {
+                    settings["AutoReplace"]["t"] = "table";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["v"]))
+                {
+                    settings["AutoReplace"]["v"] = "view";
+                }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["i"]))
                 {
                     settings["AutoReplace"]["i"] = "insert into";
@@ -422,11 +439,11 @@ namespace wxcPLSQLPlugin
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["g"]))
                 {
-                    settings["AutoReplace"]["w"] = "group by ";
+                    settings["AutoReplace"]["g"] = "group by ";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["m"]))
                 {
-                    settings["AutoReplace"]["w"] = "merge into";
+                    settings["AutoReplace"]["m"] = "merge into";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["sn"]))
                 {
@@ -451,6 +468,14 @@ namespace wxcPLSQLPlugin
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["dc"]))
                 {
                     settings["AutoReplace"]["dc"] = "developer_code";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["d"]))
+                {
+                    settings["AutoReplace"]["d"] = "dev_code";
+                }
+                if (string.IsNullOrEmpty(settings["AutoReplace"]["jf"]))
+                {
+                    settings["AutoReplace"]["jf"] = "tb_ft_holiday_2013_day";
                 }
                 iniDataParser.WriteFile(pluginSettingFile, settings);
             }
@@ -587,13 +612,17 @@ namespace wxcPLSQLPlugin
                     if (settings["Function"]["AutoCommit"] == "1")
                     {
 
-                        //通过IDE_PERFORM执行commit（会提示）
+                        //直接执行commit（会提示）
                         bool a = idePerformCallback(4);
                     }
                     else if (settings["Function"]["AutoCommit"] == "2")
                     {
-                        //通过SQL_EXECUTE执行commit（不提示）
-                        bool a = sqlExecuteCallback("commit;");
+                        //用线程去捕捉Confirm框
+                        ThreadStart childref = new ThreadStart(CallToChildThread);
+                        Thread childThread = new Thread(childref);
+                        childThread.Start();
+                        //发送Commit
+                        bool a = idePerformCallback(4);
                     }
                 }
             }
@@ -1122,12 +1151,43 @@ namespace wxcPLSQLPlugin
             settings = iniDataParser.ReadFile(pluginSettingFile);
         }
 
-        //测试向编辑器输出
+        //测试
         private void OutputEditorHandle()
         {
-            IntPtr intCurrentEditorHandle = ideGetEditorHandleCallback();
-            SendStringMessage(intCurrentEditorHandle, "Hello World");
-            MessageBox.Show(intCurrentEditorHandle.ToString());
+            //用线程去捕捉Confirm框
+            ThreadStart childref = new ThreadStart(CallToChildThread);
+            Thread childThread = new Thread(childref);
+            childThread.Start();
+            //发送Commit
+            bool a = idePerformCallback(4);
+        }
+
+        public static void CallToChildThread()
+        {
+            //等个50毫秒
+            Thread.Sleep(50);
+            //找到确定窗口
+            IntPtr intConfirmWindowHandle = Win32API.FindWindow("TMessageForm.UnicodeClass", "Confirm");
+            ///MessageBox.Show(intConfirmWindowHandle.ToString());
+            if (intConfirmWindowHandle != null && intConfirmWindowHandle != IntPtr.Zero)
+            {
+                //找到Don't Show CheckBox
+                IntPtr intCheckBoxHandle = Win32API.FindWindowEx(intConfirmWindowHandle, IntPtr.Zero, "TCheckBox", null);
+                if (intCheckBoxHandle != null && intCheckBoxHandle != IntPtr.Zero)
+                {
+                    Win32API.SendMessage(intCheckBoxHandle, WM.LBUTTONDOWN, 1, 0);
+                    Win32API.SendMessage(intCheckBoxHandle, WM.LBUTTONUP, 1, 0);
+                }
+                //找到Yes按钮
+                IntPtr intYesButtonHandle = Win32API.FindWindowEx(intConfirmWindowHandle, IntPtr.Zero, "TButton", "&Yes");
+                ///MessageBox.Show(intYesButtonHandle.ToString());
+                if (intYesButtonHandle != null && intYesButtonHandle != IntPtr.Zero)
+                {
+                    //发送鼠标点击事件
+                    Win32API.SendMessage(intYesButtonHandle, WM.LBUTTONDOWN, 1, 10 + (10 << 16));
+                    Win32API.SendMessage(intYesButtonHandle, WM.LBUTTONUP, 1, 10 + (10 << 16));
+                }
+            }
         }
 
         //在编辑器输出输出一个字符串

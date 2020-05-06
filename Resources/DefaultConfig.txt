@@ -11,7 +11,11 @@ AutoCommit=1
 AskOnClosing=2
 
 [AutoReplace]
-s=select * from 
+s=select * from
+sf=select * from
+c=create
+t=table
+v=view
 i=insert into
 u=update
 w=where 
@@ -24,3 +28,5 @@ bb=bengbu.
 lbdu=lbdu_developer_info
 dn=developer_name
 dc=developer_code
+d=dev_code
+jf=tb_ft_holiday_2013_day
