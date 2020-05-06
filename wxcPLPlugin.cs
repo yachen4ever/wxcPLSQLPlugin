@@ -450,7 +450,7 @@ namespace wxcPLSQLPlugin
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["dc"]))
                 {
-                    settings["AutoReplace"]["dn"] = "developer_code";
+                    settings["AutoReplace"]["dc"] = "developer_code";
                 }
                 iniDataParser.WriteFile(pluginSettingFile, settings);
             }

@@ -37,9 +37,9 @@
 4. 自己开发的东西当然随心所欲
 
 ## Thanks
-1. (CnPlugin)[http://blog.sina.com.cn/marcconverter]
-2. (DllExport)[https://github.com/3F/DllExport]
-3. (Ini-Parser)[https://github.com/rickyah/ini-parser]
+1. (CnPlugin)[http://blog.sina.com.cn/marcconverter] 本插件的启发来源
+2. (DllExport)[https://github.com/3F/DllExport] C#的导出Dll工具
+3. (Ini-Parser)[https://github.com/rickyah/ini-parser] 操作Ini文件用于保存配置
 
 ## Update Log
 
