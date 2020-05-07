@@ -29,8 +29,22 @@ namespace wxcPLSQLPlugin
     delegate int IdeGetCursorWordPosition();
     //序号39，执行特定操作
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool IdePerform(int Param);
-    //序号40，执行SQL语句
+    //序号40，执行SQL查询
     [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlExecute(string SQL);
+    //序号41，执行SQL查询返回的结果数量
+    delegate int SqlFieldCount();
+    //序号42，SQL查询结果是否还有下一行
+    [return: MarshalAs(UnmanagedType.Bool)] delegate bool SqlEof();
+    //序号43，SQL查询结果的下一行
+    delegate int SqlNext();
+    //序号44，SQL查询结果（传入的是FieldIndex）
+    delegate int SqlField(int Field);
+    //序号45，SQL查询结果字段名（传入的是FieldIndex）
+    delegate string SqlFieldName(int Field);
+    //序号46，SQL查询结果字段的Index（传入的是FieldName）
+    delegate int SqlFieldIndex(string name);
+    //序号47，SQL查询结果字段类型（传入的是FieldIndex）
+    delegate int SqlFieldType（int Field);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
     delegate void IdeSplashCreate(int progressMax);
     //序号92，改变登录界面文字

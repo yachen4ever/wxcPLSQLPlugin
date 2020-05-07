@@ -92,6 +92,27 @@ namespace wxcPLSQLPlugin
         private static SqlExecute sqlExecuteCallback;
         private const int CONST_CB_SQL_EXECUTE = 40;
 
+        private static SqlFieldCount sqlFieldCountCallback;
+        private const int CONST_CB_SQL_FIELDCOUNT = 41;
+
+        private static SqlEof sqlEofCallback;
+        private const int CONST_CB_SQL_EOF = 42;
+
+        private static SqlNext sqlNextCallback;
+        private const int CONST_CB_SQL_NEXT = 43;
+
+        private static SqlField sqlFieldCallback;
+        private const int CONST_CB_SQL_FIELD = 44;
+
+        private static SqlFieldName sqlFieldNameCallback;
+        private const int CONST_CB_SQL_FIELDNAME = 45;
+
+        private static SqlFieldIndex sqlFieldIndexCallback;
+        private const int CONST_CB_SQL_FIELDINDEX = 46;
+
+        private static SqlFieldType sqlFieldTypeCallback;
+        private const int CONST_CB_SQL_FIELDTYPE = 47;
+
         private static IdeSplashCreate ideSplashCreateCallback;
         private const int CONST_CB_IDE_SPLASHCREATE = 90;
 
@@ -345,6 +366,27 @@ namespace wxcPLSQLPlugin
                     break; 
                 case CONST_CB_SQL_EXECUTE:
                     sqlExecuteCallback = (SqlExecute)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlExecute));
+                    break;
+                case CONST_CB_SQL_FIELDCOUNT:
+                    sqlFieldCountCallback = (SqlFieldCount)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlFieldCount));
+                    break;
+                case CONST_CB_SQL_EOF:
+                    sqlEofCallback = (SqlEof)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlEof));
+                    break;
+                case CONST_CB_SQL_NEXT:
+                    sqlNextCallback = (SqlNext)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlNext));
+                    break;
+                case CONST_CB_SQL_FIELD:
+                    sqlFieldCallback = (SqlField)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlField));
+                    break;
+                case CONST_CB_SQL_FIELDNAME:
+                    sqlFieldNameCallback = (SqlFieldName)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlFieldName));
+                    break;
+                case CONST_CB_SQL_FIELDINDEX:
+                    sqlFieldIndexCallback = (SqlFieldIndex)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlFieldIndex));
+                    break;
+                case CONST_CB_SQL_FIELDTYPE:
+                    sqlFieldTypeCallback = (SqlFieldType)Marshal.GetDelegateForFunctionPointer(function, typeof(SqlFieldType));
                     break;
                 case CONST_CB_IDE_SPLASHCREATE:
                     ideSplashCreateCallback = (IdeSplashCreate)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSplashCreate));
