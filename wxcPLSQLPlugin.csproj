@@ -145,6 +145,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="autoUpdateForBBDX.bat" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
