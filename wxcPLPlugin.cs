@@ -13,7 +13,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.1 Build20200506";
+        public static string pluginVersion = "1.1.1 Build20200507";
 
         //INIParser
         public static IniData settings;
@@ -403,79 +403,79 @@ namespace wxcPLSQLPlugin
 
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["s"]))
                 {
-                    settings["AutoReplace"]["s"] = "select * from ";
+                    settings["AutoReplace"]["s"] = "select * from wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["sf"]))
                 {
-                    settings["AutoReplace"]["sf"] = "select * from ";
+                    settings["AutoReplace"]["sf"] = "select * from wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["c"]))
                 {
-                    settings["AutoReplace"]["c"] = "create";
+                    settings["AutoReplace"]["c"] = "create wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["t"]))
                 {
-                    settings["AutoReplace"]["t"] = "table";
+                    settings["AutoReplace"]["t"] = "table wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["v"]))
                 {
-                    settings["AutoReplace"]["v"] = "view";
+                    settings["AutoReplace"]["v"] = "view wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["i"]))
                 {
-                    settings["AutoReplace"]["i"] = "insert into";
+                    settings["AutoReplace"]["i"] = "insert into wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["u"]))
                 {
-                    settings["AutoReplace"]["u"] = "update";
+                    settings["AutoReplace"]["u"] = "update wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["w"]))
                 {
-                    settings["AutoReplace"]["w"] = "where ";
+                    settings["AutoReplace"]["w"] = "where wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["o"]))
                 {
-                    settings["AutoReplace"]["o"] = "order by ";
+                    settings["AutoReplace"]["o"] = "order by wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["g"]))
                 {
-                    settings["AutoReplace"]["g"] = "group by ";
+                    settings["AutoReplace"]["g"] = "group by wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["m"]))
                 {
-                    settings["AutoReplace"]["m"] = "merge into";
+                    settings["AutoReplace"]["m"] = "merge into wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["sn"]))
                 {
-                    settings["AutoReplace"]["sn"] = "service_nbr";
+                    settings["AutoReplace"]["sn"] = "service_nbrwxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["an"]))
                 {
-                    settings["AutoReplace"]["an"] = "acc_num";
+                    settings["AutoReplace"]["an"] = "acc_numwxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["bb"]))
                 {
-                    settings["AutoReplace"]["bb"] = "bengbu.";
+                    settings["AutoReplace"]["bb"] = "bengbu.wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["lbdu"]))
                 {
-                    settings["AutoReplace"]["lbdu"] = "lbdu_developer_info";
+                    settings["AutoReplace"]["lbdu"] = "lbdu_developer_info wxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["dn"]))
                 {
-                    settings["AutoReplace"]["dn"] = "developer_name";
+                    settings["AutoReplace"]["dn"] = "developer_namewxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["dc"]))
                 {
-                    settings["AutoReplace"]["dc"] = "developer_code";
+                    settings["AutoReplace"]["dc"] = "developer_codewxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["d"]))
                 {
-                    settings["AutoReplace"]["d"] = "dev_code";
+                    settings["AutoReplace"]["d"] = "dev_codewxc_EOL";
                 }
                 if (string.IsNullOrEmpty(settings["AutoReplace"]["jf"]))
                 {
-                    settings["AutoReplace"]["jf"] = "tb_ft_holiday_2013_day";
+                    settings["AutoReplace"]["jf"] = "tb_ft_holiday_2013_day wxc_EOL";
                 }
                 iniDataParser.WriteFile(pluginSettingFile, settings);
             }
@@ -1190,27 +1190,6 @@ namespace wxcPLSQLPlugin
             }
         }
 
-        //在编辑器输出输出一个字符串
-        private static void SendStringMessage(IntPtr intHandle, string text)
-        {
-            for (int i = 0;i < text.Length; i++)
-            {
-                Win32API.SendMessage(intHandle, WM.CHAR, (int)(text[i]), 0);
-            }
-        }
-
-        //在编辑器向前删除n个字符
-        private static void SendBackSpaceNTimes(IntPtr intHandle, int n)
-        {
-            for (int i = 0; i < n; i++)
-            {
-                //8是BackSpace的ASCII编码
-                //这里需要用WM.KEYDOWN而不是WM.CHAR,因为WM.CHAR是翻译后的字符，详见
-                //https://docs.microsoft.com/zh-cn/windows/win32/inputdev/wm-keydown
-                Win32API.SendMessage(intHandle, WM.KEYDOWN, 8, 0);
-            }
-        }
-
         //自动替换钩子方法
         //https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms644984(v=vs.85)?redirectedfrom=MSDN
         private static IntPtr AutoReplaceHookProcCallback(int code, IntPtr wParam, IntPtr lParam)
@@ -1245,9 +1224,9 @@ namespace wxcPLSQLPlugin
                         if (!string.IsNullOrEmpty(settings["AutoReplace"][strCursorWord]))
                         {
                             //先把要替换的部分删了
-                            SendBackSpaceNTimes(intCurrentEditorHandle, strCursorWord.Length);
+                            MyFunc.SendBackSpaceNTimes(intCurrentEditorHandle, strCursorWord.Length);
                             //把替换的塞进去
-                            SendStringMessage(intCurrentEditorHandle, settings["AutoReplace"][strCursorWord]);
+                            MyFunc.SendStringMessage(intCurrentEditorHandle, MyFunc.MyUnEscape(settings["AutoReplace"][strCursorWord]));
                         }
                         //返回非空值使得键盘键入事件不再传入pl/sql自己处理（打出tab的效果）
                         return (IntPtr)1;
@@ -1259,6 +1238,5 @@ namespace wxcPLSQLPlugin
             //如果不处于可以替换的情况，还把Tab键传回PL/SQL以打出tab
             return Win32API.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
         }
-
     }
 }  

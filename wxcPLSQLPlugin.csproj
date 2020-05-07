@@ -124,6 +124,7 @@
     <Compile Include="Model\KeyDataCollection.cs" />
     <Compile Include="Model\SectionData.cs" />
     <Compile Include="Model\SectionDataCollection.cs" />
+    <Compile Include="MyFunc.cs" />
     <Compile Include="Parser\ConcatenateDuplicatedKeysIniDataParser.cs" />
     <Compile Include="Parser\IniDataParser.cs" />
     <Compile Include="SettingsUI.cs">

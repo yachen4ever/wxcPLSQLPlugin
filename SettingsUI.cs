@@ -1,6 +1,7 @@
 ﻿using IniParser;
 using IniParser.Model;
 using System;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace wxcPLSQLPlugin
@@ -146,7 +147,7 @@ namespace wxcPLSQLPlugin
         {
             if (listBoxAutoReplaceKey.SelectedItem != null)
             {
-                textBoxAutoReplaceValue.Text = settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()];
+                textBoxAutoReplaceValue.Text = MyFunc.MyUnEscape(settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()]);
             }
         }
 
@@ -154,7 +155,7 @@ namespace wxcPLSQLPlugin
         {
             if (listBoxAutoReplaceKey.SelectedItem != null)
             {
-                settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()] = textBoxAutoReplaceValue.Text;
+                settings["AutoReplace"][listBoxAutoReplaceKey.SelectedItem.ToString()] = MyFunc.MyEscape(textBoxAutoReplaceValue.Text);
             }
         }
 
