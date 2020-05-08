@@ -44,7 +44,7 @@ namespace wxcPLSQLPlugin
     //序号46，SQL查询结果字段的Index（传入的是FieldName）
     delegate int SqlFieldIndex(string name);
     //序号47，SQL查询结果字段类型（传入的是FieldIndex）
-    delegate int SqlFieldType（int Field);
+    delegate int SqlFieldType(int Field);
     //序号90，新建登录界面（会自动替换原有并加上进度条)
     delegate void IdeSplashCreate(int progressMax);
     //序号92，改变登录界面文字

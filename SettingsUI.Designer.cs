@@ -41,6 +41,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPageAutoReplace = new System.Windows.Forms.TabPage();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBoxToBeAdded = new System.Windows.Forms.TextBox();
             this.buttonDelKey = new System.Windows.Forms.Button();
             this.buttonAddKey = new System.Windows.Forms.Button();
             this.textBoxAutoReplaceValue = new System.Windows.Forms.TextBox();
@@ -50,8 +52,6 @@
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonApply = new System.Windows.Forms.Button();
-            this.textBoxToBeAdded = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPageCommon.SuspendLayout();
             this.tabPageAutoReplace.SuspendLayout();
@@ -66,7 +66,7 @@
             this.tabControl1.Cursor = System.Windows.Forms.Cursors.Default;
             this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabControl1.Location = new System.Drawing.Point(48, 50);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(800, 494);
@@ -84,9 +84,9 @@
             this.tabPageCommon.Controls.Add(this.label3);
             this.tabPageCommon.Controls.Add(this.label1);
             this.tabPageCommon.Location = new System.Drawing.Point(4, 43);
-            this.tabPageCommon.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageCommon.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageCommon.Name = "tabPageCommon";
-            this.tabPageCommon.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageCommon.Padding = new System.Windows.Forms.Padding(4);
             this.tabPageCommon.Size = new System.Drawing.Size(792, 447);
             this.tabPageCommon.TabIndex = 0;
             this.tabPageCommon.Text = " 常规设置 ";
@@ -96,7 +96,7 @@
             // 
             this.checkBoxMaximizeChildWindow.AutoSize = true;
             this.checkBoxMaximizeChildWindow.Location = new System.Drawing.Point(470, 238);
-            this.checkBoxMaximizeChildWindow.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxMaximizeChildWindow.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxMaximizeChildWindow.Name = "checkBoxMaximizeChildWindow";
             this.checkBoxMaximizeChildWindow.Size = new System.Drawing.Size(286, 35);
             this.checkBoxMaximizeChildWindow.TabIndex = 2;
@@ -107,7 +107,7 @@
             // 
             this.checkBoxEnableAutoReplace.AutoSize = true;
             this.checkBoxEnableAutoReplace.Location = new System.Drawing.Point(34, 292);
-            this.checkBoxEnableAutoReplace.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxEnableAutoReplace.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxEnableAutoReplace.Name = "checkBoxEnableAutoReplace";
             this.checkBoxEnableAutoReplace.Size = new System.Drawing.Size(190, 35);
             this.checkBoxEnableAutoReplace.TabIndex = 2;
@@ -118,7 +118,7 @@
             // 
             this.checkBoxMaximizeWindow.AutoSize = true;
             this.checkBoxMaximizeWindow.Location = new System.Drawing.Point(34, 238);
-            this.checkBoxMaximizeWindow.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxMaximizeWindow.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxMaximizeWindow.Name = "checkBoxMaximizeWindow";
             this.checkBoxMaximizeWindow.Size = new System.Drawing.Size(297, 35);
             this.checkBoxMaximizeWindow.TabIndex = 2;
@@ -133,7 +133,7 @@
             "永远提示",
             "永远不提示"});
             this.comboBoxAskOnClosing.Location = new System.Drawing.Point(336, 162);
-            this.comboBoxAskOnClosing.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxAskOnClosing.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxAskOnClosing.Name = "comboBoxAskOnClosing";
             this.comboBoxAskOnClosing.Size = new System.Drawing.Size(404, 39);
             this.comboBoxAskOnClosing.TabIndex = 1;
@@ -144,9 +144,9 @@
             this.comboBoxAfterExecute.Items.AddRange(new object[] {
             "不自动Commit",
             "提示是否需要Commit",
-            "自动Commit（在PLSQL14还会提示）"});
+            "不提示自动Commit"});
             this.comboBoxAfterExecute.Location = new System.Drawing.Point(336, 106);
-            this.comboBoxAfterExecute.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxAfterExecute.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxAfterExecute.Name = "comboBoxAfterExecute";
             this.comboBoxAfterExecute.Size = new System.Drawing.Size(404, 39);
             this.comboBoxAfterExecute.TabIndex = 1;
@@ -164,7 +164,7 @@
             "Report Window",
             "HTML Window"});
             this.comboBoxStartup.Location = new System.Drawing.Point(336, 48);
-            this.comboBoxStartup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxStartup.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxStartup.Name = "comboBoxStartup";
             this.comboBoxStartup.Size = new System.Drawing.Size(404, 39);
             this.comboBoxStartup.TabIndex = 1;
@@ -208,18 +208,34 @@
             this.tabPageAutoReplace.Controls.Add(this.textBoxAutoReplaceValue);
             this.tabPageAutoReplace.Controls.Add(this.listBoxAutoReplaceKey);
             this.tabPageAutoReplace.Location = new System.Drawing.Point(4, 43);
-            this.tabPageAutoReplace.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageAutoReplace.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageAutoReplace.Name = "tabPageAutoReplace";
-            this.tabPageAutoReplace.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageAutoReplace.Padding = new System.Windows.Forms.Padding(4);
             this.tabPageAutoReplace.Size = new System.Drawing.Size(792, 447);
             this.tabPageAutoReplace.TabIndex = 1;
             this.tabPageAutoReplace.Text = "自动替换设置";
             this.tabPageAutoReplace.UseVisualStyleBackColor = true;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(22, 307);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(110, 31);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "新增Key:";
+            // 
+            // textBoxToBeAdded
+            // 
+            this.textBoxToBeAdded.Location = new System.Drawing.Point(134, 303);
+            this.textBoxToBeAdded.Name = "textBoxToBeAdded";
+            this.textBoxToBeAdded.Size = new System.Drawing.Size(134, 39);
+            this.textBoxToBeAdded.TabIndex = 3;
+            // 
             // buttonDelKey
             // 
             this.buttonDelKey.Location = new System.Drawing.Point(166, 368);
-            this.buttonDelKey.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.buttonDelKey.Margin = new System.Windows.Forms.Padding(6);
             this.buttonDelKey.Name = "buttonDelKey";
             this.buttonDelKey.Size = new System.Drawing.Size(102, 46);
             this.buttonDelKey.TabIndex = 2;
@@ -230,7 +246,7 @@
             // buttonAddKey
             // 
             this.buttonAddKey.Location = new System.Drawing.Point(36, 368);
-            this.buttonAddKey.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.buttonAddKey.Margin = new System.Windows.Forms.Padding(6);
             this.buttonAddKey.Name = "buttonAddKey";
             this.buttonAddKey.Size = new System.Drawing.Size(102, 46);
             this.buttonAddKey.TabIndex = 2;
@@ -241,7 +257,7 @@
             // textBoxAutoReplaceValue
             // 
             this.textBoxAutoReplaceValue.Location = new System.Drawing.Point(348, 34);
-            this.textBoxAutoReplaceValue.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBoxAutoReplaceValue.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxAutoReplaceValue.Multiline = true;
             this.textBoxAutoReplaceValue.Name = "textBoxAutoReplaceValue";
             this.textBoxAutoReplaceValue.Size = new System.Drawing.Size(390, 308);
@@ -253,7 +269,7 @@
             this.listBoxAutoReplaceKey.FormattingEnabled = true;
             this.listBoxAutoReplaceKey.ItemHeight = 31;
             this.listBoxAutoReplaceKey.Location = new System.Drawing.Point(36, 34);
-            this.listBoxAutoReplaceKey.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.listBoxAutoReplaceKey.Margin = new System.Windows.Forms.Padding(6);
             this.listBoxAutoReplaceKey.Name = "listBoxAutoReplaceKey";
             this.listBoxAutoReplaceKey.Size = new System.Drawing.Size(232, 252);
             this.listBoxAutoReplaceKey.TabIndex = 0;
@@ -273,7 +289,7 @@
             // 
             this.buttonOK.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonOK.Location = new System.Drawing.Point(126, 568);
-            this.buttonOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonOK.Margin = new System.Windows.Forms.Padding(4);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(150, 50);
             this.buttonOK.TabIndex = 1;
@@ -285,7 +301,7 @@
             // 
             this.buttonCancel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonCancel.Location = new System.Drawing.Point(350, 568);
-            this.buttonCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(4);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(150, 50);
             this.buttonCancel.TabIndex = 1;
@@ -297,29 +313,13 @@
             // 
             this.buttonApply.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonApply.Location = new System.Drawing.Point(568, 568);
-            this.buttonApply.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonApply.Margin = new System.Windows.Forms.Padding(4);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(150, 50);
             this.buttonApply.TabIndex = 1;
             this.buttonApply.Text = "应用";
             this.buttonApply.UseVisualStyleBackColor = true;
             this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
-            // 
-            // textBoxToBeAdded
-            // 
-            this.textBoxToBeAdded.Location = new System.Drawing.Point(134, 303);
-            this.textBoxToBeAdded.Name = "textBoxToBeAdded";
-            this.textBoxToBeAdded.Size = new System.Drawing.Size(134, 39);
-            this.textBoxToBeAdded.TabIndex = 3;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(22, 307);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(110, 31);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "新增Key:";
             // 
             // SettingsUI
             // 
@@ -331,7 +331,7 @@
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.tabControl1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SettingsUI";
             this.Text = "wxcPLSQLPlugin设置界面";
             this.Load += new System.EventHandler(this.SettingsUI_Load);
