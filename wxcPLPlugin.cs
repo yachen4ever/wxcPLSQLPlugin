@@ -13,7 +13,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.1.1 Build20200507";
+        public static string pluginVersion = "1.1.2 Build20200509";
 
         //INIParser
         public static IniData settings;
@@ -769,8 +769,10 @@ namespace wxcPLSQLPlugin
                 }
             }
             strAfterHandle += ")";
+
+            IntPtr currentEditorHandle = ideGetEditorHandleCallback();
             //如果没有选中文本直接输出全部文本
-            switch(flagWho)
+            switch (flagWho)
             {
                 case 1:
                     ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
@@ -1182,7 +1184,7 @@ namespace wxcPLSQLPlugin
         //常用查询：表在哪个存储过程创建
         private void MostUsedSql_TableInWhichProc()
         {
-            CreateSqlWindow("SELECT DISTINCT * FROM user_source WHERE TYPE = 'PROCEDURE' AND upper(text) LIKE '%CREATE TABLE%&TABLENAME%';");
+            CreateSqlWindow("SELECT DISTINCT * FROM user_source WHERE TYPE = 'PROCEDURE' AND upper(text) LIKE upper('%CREATE TABLE%&TABLENAME%');");
             idePerformCallback(1);
         }
 
