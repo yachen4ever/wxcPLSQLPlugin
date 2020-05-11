@@ -827,7 +827,7 @@ namespace wxcPLSQLPlugin
                         break;
                     }
                     //如果这一位还是合法变量名，长度+1
-                    if (isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intVariableLength]))
+                    if (MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intVariableLength]))
                     {
                         intVariableLength++;
                     }
@@ -865,16 +865,6 @@ namespace wxcPLSQLPlugin
                 strAfterHandle = "Execute Immediate '" + strAfterHandle + "';";
             }
             return strAfterHandle;
-        }
-
-        //判断是否为合法变量字符
-        private static bool isLegalVariableChar(char v)
-        {
-            if (char.IsLetterOrDigit(v) || v == '_')
-            {
-                return true;
-            }
-            return false;
         }
 
         //UnEscape一句SQL
@@ -925,7 +915,7 @@ namespace wxcPLSQLPlugin
                 }
                 //往后找变量名
                 int intPosOfVariableStart = intPosOfJoint + 2;
-                while (!isLegalVariableChar(strAfterHandle[intPosOfVariableStart]))
+                while (!MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart]))
                 {
                     if (intPosOfVariableStart == strAfterHandle.Length - 1)
                     {
@@ -934,7 +924,7 @@ namespace wxcPLSQLPlugin
                     intPosOfVariableStart++;
                 }
                 int intPosOfVariableLength = 1;
-                while (isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intPosOfVariableLength]))
+                while (MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intPosOfVariableLength]))
                 {
                     if (intPosOfVariableStart + intPosOfVariableLength == strAfterHandle.Length - 1)
                     {
@@ -1206,6 +1196,7 @@ namespace wxcPLSQLPlugin
             bool a = idePerformCallback(4);
         }
 
+        //创建子线程去关闭Commit确认框
         public static void CallToChildThread()
         {
             //等个50毫秒

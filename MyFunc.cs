@@ -24,6 +24,16 @@ namespace wxcPLSQLPlugin
             return text;
         }
 
+        //判断是否为合法变量字符
+        public static bool isLegalVariableChar(char v)
+        {
+            if (char.IsLetterOrDigit(v) || v == '_')
+            {
+                return true;
+            }
+            return false;
+        }
+
         //在编辑器输出输出一个字符串
         public static void SendStringMessage(IntPtr intHandle, string text)
         {
