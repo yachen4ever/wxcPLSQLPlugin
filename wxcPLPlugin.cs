@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
+using System.Collections.Generic;
 
 namespace wxcPLSQLPlugin
 {
@@ -13,7 +15,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.1.2 Build20200509";
+        public static string pluginVersion = "1.2 Build20200512";
 
         //INIParser
         public static IniData settings;
@@ -34,7 +36,7 @@ namespace wxcPLSQLPlugin
         #region 菜单项定义
         const int MENU_INDEX_START = 1;
         const int MENU_INDEX_GROUP_FUNCTION = 2;
-        const int MENU_INDEX_HELLOWORLD = 3;
+        const int MENU_INDEX_FIELDSCREENER = 3;
         const int MENU_INDEX_WHEREIN = 4;
         const int MENU_INDEX_ESCAPE = 5;
         const int MENU_INDEX_UNESCAPE = 6;
@@ -181,8 +183,8 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_GROUP_FUNCTION:
                         return "GROUP=功能";
 
-                    case MENU_INDEX_HELLOWORLD:
-                        return "ITEM=Hello World";
+                    case MENU_INDEX_FIELDSCREENER:
+                        return "ITEM=字段筛选查询";
 
                     case MENU_INDEX_WHEREIN:
                         return "ITEM=WHERE IN (X)";
@@ -238,8 +240,8 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_GROUP_FUNCTION:
                         return "wxcPQPlugin / -";
 
-                    case MENU_INDEX_HELLOWORLD:
-                        return "wxcPQPlugin / Hello World";
+                    case MENU_INDEX_FIELDSCREENER:
+                        return "wxcPQPlugin / 字段筛选查询";
 
                     case MENU_INDEX_WHEREIN:
                         return "wxcPQPlugin / WHERE IN (X)";
@@ -292,8 +294,8 @@ namespace wxcPLSQLPlugin
         {
             switch (index)
             {
-                case MENU_INDEX_HELLOWORLD:
-                    thisPlugin.OutputEditorHandle();
+                case MENU_INDEX_FIELDSCREENER:
+                    thisPlugin.FieldScreener();
                     break;
                 case MENU_INDEX_WHEREIN:
                     thisPlugin.HandleWhereInX();
@@ -998,6 +1000,8 @@ namespace wxcPLSQLPlugin
                 flagIsSelected = false;
             }
 
+            int curX = ideGetCursorXCallback();
+            int curY = ideGetCursorYCallback();
 
             //如果没有选中文本则处理全部文本
             if (!flagIsSelected)
@@ -1006,7 +1010,25 @@ namespace wxcPLSQLPlugin
             }
 
             //处理文本
-            string strAfterHandle = EscapeSentence(strToBeHandled);
+            //定义处理后的文本
+            string strAfterHandle = "";
+
+            //定义一下分隔符
+            string[] splitString = { "\r\n" };
+            string[] lines = strToBeHandled.Split(splitString, StringSplitOptions.RemoveEmptyEntries);
+            int cntLines = 1;
+            int cntLastLineChars = 0;
+
+            foreach (var line in lines)
+            {
+                //只要不是空的就格式化下塞进strAfterHandled
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    strAfterHandle += EscapeSentence(line) + "\r\n";
+                    cntLines++;
+                    cntLastLineChars = line.Length;
+                }
+            }
 
             //如果没有选中文本直接输出全部文本
             if (!flagIsSelected)
@@ -1018,7 +1040,7 @@ namespace wxcPLSQLPlugin
             {
                 ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
             }
-
+            ideSetCursorCallback(cntLastLineChars, curY + cntLines - 1);
         }
 
         //处理UnEscape功能的方法
@@ -1046,8 +1068,29 @@ namespace wxcPLSQLPlugin
                 strToBeHandled = strAll;
             }
 
+            int curX = ideGetCursorXCallback();
+            int curY = ideGetCursorYCallback();
+
             //处理文本
-            string strAfterHandle = UnEscapeSentence(strToBeHandled);
+            //定义处理后的文本
+            string strAfterHandle = "";
+
+            //定义一下分隔符
+            string[] splitString = { "\r\n" };
+            string[] lines = strToBeHandled.Split(splitString, StringSplitOptions.RemoveEmptyEntries);
+            int cntLines = 1;
+            int cntLastLineChars = 0;
+
+            foreach (var line in lines)
+            {
+                //只要不是空的就格式化下塞进strAfterHandled
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    strAfterHandle += UnEscapeSentence(line) + "\r\n";
+                    cntLines++;
+                    cntLastLineChars = line.Length;
+                }
+            }
 
             //如果没有选中文本直接输出全部文本
             if (!flagIsSelected)
@@ -1059,7 +1102,7 @@ namespace wxcPLSQLPlugin
             {
                 ideSetTextCallback(strAll.Replace(strToBeHandled, strAfterHandle));
             }
-
+            ideSetCursorCallback(cntLastLineChars, curY + cntLines - 1);
         }
 
         //处理注释功能的方法
@@ -1207,13 +1250,57 @@ namespace wxcPLSQLPlugin
             settings = iniDataParser.ReadFile(pluginSettingFile);
         }
 
-        //测试
-        private void OutputEditorHandle()
+        //字段筛选查询
+        private void FieldScreener()
         {
-            int curX = ideGetCursorXCallback();
-            int curY = ideGetCursorYCallback();
-            MessageBox.Show("x=" + curX.ToString() + "\ny=" + curY.ToString());
-            ideSetCursorCallback(curX - 1, curY - 1);
+            string sql = ideGetTextCallback().ToLower();
+            int firstFromLocation = sql.IndexOf("from");
+            string myTable = sql.Substring(firstFromLocation + 4).Trim();
+            //MessageBox.Show(myTable);
+            string myFieldneeded = "";
+            string sqlToBeExecuted = "";
+            sqlExecuteCallback(sql);
+            int cntColumn = sqlFieldCountCallback();
+            string strColumnsNeeded = Interaction.InputBox("输入需要查询的列名，多列可用半角引号隔开","列名模糊查询", "*");
+            //todo:合法性校验
+            if (strColumnsNeeded == "*")
+            {
+                sqlToBeExecuted = "select * from " + myTable;
+            }
+            else
+            {
+                string[] mesh = strColumnsNeeded.Split(',');
+                
+                List<string> columnNeeded = new List<string>();
+                for (int i = 0; i < cntColumn; i++)
+                {
+                    string columnName = sqlFieldNameCallback(i).ToLower();
+                    foreach (var re in mesh)
+                    {
+                        if (columnName.Contains(re) && !columnNeeded.Contains(columnName))
+                        {
+                            columnNeeded.Add(columnName);
+                        }
+                    }
+                }
+                foreach (var str in columnNeeded)
+                {
+                    myFieldneeded += str + ",";
+                }
+                //MessageBox.Show(myFieldneeded);
+                if (string.IsNullOrWhiteSpace(myFieldneeded))
+                {
+                    myFieldneeded = "*";
+                }
+                else
+                {
+                    myFieldneeded = myFieldneeded.Substring(0, myFieldneeded.Length - 1);
+                }
+                //MessageBox.Show(myFieldneeded);
+                sqlToBeExecuted = "select " + myFieldneeded + " from " + myTable;
+            }
+            ideSetTextCallback(sqlToBeExecuted);
+            idePerformCallback(1);
         }
 
         //创建子线程去关闭Commit确认框

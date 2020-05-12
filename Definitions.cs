@@ -38,7 +38,7 @@ namespace wxcPLSQLPlugin
     //序号43，SQL查询结果的下一行
     delegate int SqlNext();
     //序号44，SQL查询结果（传入的是FieldIndex）
-    delegate int SqlField(int Field);
+    delegate string SqlField(int Field);
     //序号45，SQL查询结果字段名（传入的是FieldIndex）
     delegate string SqlFieldName(int Field);
     //序号46，SQL查询结果字段的Index（传入的是FieldName）
