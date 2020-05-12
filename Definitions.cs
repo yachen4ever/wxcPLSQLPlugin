@@ -51,6 +51,12 @@ namespace wxcPLSQLPlugin
     delegate void IdeSplashWrite(string s);
     //序号93，改变登录界面文字+换行
     delegate void IdeSplashWriteLn(string s);
+    //序号141，获得光标X方向位置
+    delegate int IdeGetCursorX();
+    //序号142，获得光标Y方向位置
+    delegate int IdeGetCursorY();
+    //序号1433，设置光标位置
+    delegate void IdeSetCursor(int X, int Y);
 
     //钩子回调方法
     delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);

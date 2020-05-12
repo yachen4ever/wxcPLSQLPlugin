@@ -122,6 +122,15 @@ namespace wxcPLSQLPlugin
         private static IdeSplashWriteLn ideSplashWriteLnCallback;
         private const int CONST_CB_IDE_SPLASHWRITELN = 93;
 
+        private static IdeGetCursorX ideGetCursorXCallback;
+        private const int CONST_CB_IDE_GETCURSORX = 141;
+
+        private static IdeGetCursorY ideGetCursorYCallback;
+        private const int CONST_CB_IDE_GETCURSORY = 142;
+
+        private static IdeSetCursor ideSetCursorCallback;
+        private const int CONST_CB_IDE_SETCURSOR = 143;
+
         private static HookProc autoReplaceHookProc = new HookProc(AutoReplaceHookProcCallback);
         private static IntPtr autoReplaceHook;
 
@@ -396,6 +405,15 @@ namespace wxcPLSQLPlugin
                     break;
                 case CONST_CB_IDE_SPLASHWRITE:
                     ideSplashWriteCallback = (IdeSplashWrite)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSplashWrite));
+                    break;
+                case CONST_CB_IDE_GETCURSORX:
+                    ideGetCursorXCallback = (IdeGetCursorX)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetCursorX));
+                    break;
+                case CONST_CB_IDE_GETCURSORY:
+                    ideGetCursorYCallback = (IdeGetCursorY)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeGetCursorY));
+                    break;
+                case CONST_CB_IDE_SETCURSOR:
+                    ideSetCursorCallback = (IdeSetCursor)Marshal.GetDelegateForFunctionPointer(function, typeof(IdeSetCursor));
                     break;
             }
         }
@@ -719,6 +737,9 @@ namespace wxcPLSQLPlugin
                 strClip = (string)iData.GetData(DataFormats.Text);
             }
 
+            int curX = ideGetCursorXCallback();
+            int curY = ideGetCursorYCallback();
+
             //要处理的文本
             string strToBeHandled = "";
             int flagWho = 0;
@@ -786,6 +807,7 @@ namespace wxcPLSQLPlugin
                 default:
                     break;
             }
+            ideSetCursorCallback(curX + strAfterHandle.Length, curY);
         }
 
         //Escape一句SQL
@@ -1188,12 +1210,10 @@ namespace wxcPLSQLPlugin
         //测试
         private void OutputEditorHandle()
         {
-            //用线程去捕捉Confirm框
-            ThreadStart childref = new ThreadStart(CallToChildThread);
-            Thread childThread = new Thread(childref);
-            childThread.Start();
-            //发送Commit
-            bool a = idePerformCallback(4);
+            int curX = ideGetCursorXCallback();
+            int curY = ideGetCursorYCallback();
+            MessageBox.Show("x=" + curX.ToString() + "\ny=" + curY.ToString());
+            ideSetCursorCallback(curX - 1, curY - 1);
         }
 
         //创建子线程去关闭Commit确认框
