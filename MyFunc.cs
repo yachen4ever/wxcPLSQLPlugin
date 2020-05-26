@@ -25,7 +25,7 @@ namespace wxcPLSQLPlugin
         }
 
         //判断是否为合法变量字符
-        public static bool isLegalVariableChar(char v)
+        public static bool IsLegalVariableChar(char v)
         {
             if (char.IsLetterOrDigit(v) || v == '_')
             {
@@ -64,6 +64,13 @@ namespace wxcPLSQLPlugin
                 //https://docs.microsoft.com/zh-cn/windows/win32/inputdev/wm-keydown
                 Win32API.SendMessage(intHandle, WM.KEYDOWN, 8, 0);
             }
+        }
+
+        //判断是否为合法的一句SQL查询语句
+        public static bool IsLegalSQLSelectSentence(string sql)
+        {
+
+            return true;
         }
     }
 }

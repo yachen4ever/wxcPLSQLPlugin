@@ -15,7 +15,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.2 Build20200512";
+        public static string pluginVersion = "1.2.1 Build20200513";
 
         //INIParser
         public static IniData settings;
@@ -851,7 +851,7 @@ namespace wxcPLSQLPlugin
                         break;
                     }
                     //如果这一位还是合法变量名，长度+1
-                    if (MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intVariableLength]))
+                    if (MyFunc.IsLegalVariableChar(strAfterHandle[intPosOfVariableStart + intVariableLength]))
                     {
                         intVariableLength++;
                     }
@@ -939,7 +939,7 @@ namespace wxcPLSQLPlugin
                 }
                 //往后找变量名
                 int intPosOfVariableStart = intPosOfJoint + 2;
-                while (!MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart]))
+                while (!MyFunc.IsLegalVariableChar(strAfterHandle[intPosOfVariableStart]))
                 {
                     if (intPosOfVariableStart == strAfterHandle.Length - 1)
                     {
@@ -948,7 +948,7 @@ namespace wxcPLSQLPlugin
                     intPosOfVariableStart++;
                 }
                 int intPosOfVariableLength = 1;
-                while (MyFunc.isLegalVariableChar(strAfterHandle[intPosOfVariableStart + intPosOfVariableLength]))
+                while (MyFunc.IsLegalVariableChar(strAfterHandle[intPosOfVariableStart + intPosOfVariableLength]))
                 {
                     if (intPosOfVariableStart + intPosOfVariableLength == strAfterHandle.Length - 1)
                     {
@@ -1014,7 +1014,7 @@ namespace wxcPLSQLPlugin
             string strAfterHandle = "";
 
             //定义一下分隔符
-            string[] splitString = { "\r\n" };
+            string[] splitString = { ";" };
             string[] lines = strToBeHandled.Split(splitString, StringSplitOptions.RemoveEmptyEntries);
             int cntLines = 1;
             int cntLastLineChars = 0;
@@ -1024,7 +1024,7 @@ namespace wxcPLSQLPlugin
                 //只要不是空的就格式化下塞进strAfterHandled
                 if (!string.IsNullOrWhiteSpace(line))
                 {
-                    strAfterHandle += EscapeSentence(line) + "\r\n";
+                    strAfterHandle += EscapeSentence(line);
                     cntLines++;
                     cntLastLineChars = line.Length;
                 }
@@ -1253,17 +1253,27 @@ namespace wxcPLSQLPlugin
         //字段筛选查询
         private void FieldScreener()
         {
-            string sql = ideGetTextCallback().ToLower();
+            string sql = Regex.Replace(ideGetTextCallback(), "from", "from", RegexOptions.IgnoreCase);
             int firstFromLocation = sql.IndexOf("from");
             string myTable = sql.Substring(firstFromLocation + 4).Trim();
             //MessageBox.Show(myTable);
             string myFieldneeded = "";
             string sqlToBeExecuted = "";
-            sqlExecuteCallback(sql);
+            //去掉末尾的分号
+            if (sql.EndsWith(";"))
+            {
+                sql = sql.Substring(0, sql.Length - 1);
+            }
+            string strToGetColumnNames = "select * from " + myTable;
+            sqlExecuteCallback(strToGetColumnNames);
             int cntColumn = sqlFieldCountCallback();
-            string strColumnsNeeded = Interaction.InputBox("输入需要查询的列名，多列可用半角引号隔开","列名模糊查询", "*");
+            string strColumnsNeeded = Interaction.InputBox("输入需要查询的列名，多列可用半角逗号隔开","列名模糊查询", "*");
             //todo:合法性校验
-            if (strColumnsNeeded == "*")
+            if (String.IsNullOrWhiteSpace(strColumnsNeeded))
+            {
+                return;
+            }
+            else if (strColumnsNeeded == "*")
             {
                 sqlToBeExecuted = "select * from " + myTable;
             }
@@ -1285,6 +1295,7 @@ namespace wxcPLSQLPlugin
                 }
                 foreach (var str in columnNeeded)
                 {
+                    //MessageBox.Show(str);
                     myFieldneeded += str + ",";
                 }
                 //MessageBox.Show(myFieldneeded);
