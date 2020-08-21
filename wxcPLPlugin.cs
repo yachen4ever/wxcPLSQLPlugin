@@ -15,7 +15,7 @@ namespace wxcPLSQLPlugin
     {
         //插件信息
         private const string PLUGIN_NAME = "wxcPLSQLPlugin";
-        public static string pluginVersion = "1.2.1 Build20200513";
+        public static string pluginVersion = "1.2.2 Build20200806";
 
         //INIParser
         public static IniData settings;
@@ -41,6 +41,7 @@ namespace wxcPLSQLPlugin
         const int MENU_INDEX_ESCAPE = 5;
         const int MENU_INDEX_UNESCAPE = 6;
         const int MENU_INDEX_COMMENT = 7;
+        const int MENU_INDEX_REPLACEHIVE = 8;
         const int MENU_INDEX_GROUP_MOST_USED_SQL = 70;
         const int MENU_INDEX_SQL_LOCKEDTABLE = 71;
         const int MENU_INDEX_SQL_PROCRUNNING = 72;
@@ -198,6 +199,9 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_COMMENT:
                         return "ITEM=注释或去注释语句";
 
+                    case MENU_INDEX_REPLACEHIVE:
+                        return "ITEM=自动替换Hive建表语句";
+
                     case MENU_INDEX_GROUP_MOST_USED_SQL:
                         return "GROUP=常用查询";
 
@@ -255,6 +259,9 @@ namespace wxcPLSQLPlugin
                     case MENU_INDEX_COMMENT:
                         return "wxcPQPlugin / 注释或去注释语句";
 
+                    case MENU_INDEX_REPLACEHIVE:
+                        return "wxcPQPlugin / 自动替换Hive建表语句";
+
                     case MENU_INDEX_GROUP_MOST_USED_SQL:
                         return "wxcPQPlugin / 常用查询 / -";
 
@@ -308,6 +315,9 @@ namespace wxcPLSQLPlugin
                     break;
                 case MENU_INDEX_COMMENT:
                     thisPlugin.HandleComment();
+                    break;
+                case MENU_INDEX_REPLACEHIVE:
+                    thisPlugin.ReplaceHiveCreateTable();
                     break;
                 case MENU_INDEX_SQL_LOCKEDTABLE:
                     thisPlugin.MostUsedSql_LockedTable();
@@ -1390,6 +1400,20 @@ namespace wxcPLSQLPlugin
             
             //如果不处于可以替换的情况，还把Tab键传回PL/SQL以打出tab
             return Win32API.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
+        }
+
+        //自动替换Hive建表语句
+        private void ReplaceHiveCreateTable()
+        {
+            string strAll = ideGetTextCallback();
+            string strAfterHandle = strAll.Replace("int", "number");
+            strAfterHandle = strAfterHandle.Replace("string", "varchar2(2000)");
+            strAfterHandle = strAfterHandle.Replace("bignumber", "number");
+            strAfterHandle = strAfterHandle.Replace("double", "number");
+            strAfterHandle = strAfterHandle.Replace("float", "number");
+            strAfterHandle = strAfterHandle.Replace("`", "");
+            strAfterHandle = Regex.Replace(strAfterHandle, "decimal\\(.*\\)", "number", RegexOptions.IgnoreCase);
+            ideSetTextCallback(strAfterHandle);
         }
     }
 }  
